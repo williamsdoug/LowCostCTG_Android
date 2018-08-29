@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from paramsDecel import FEATURE_EXTRACT_PARAMS
+from wrapClientCommon import client_common
+
+
+# The following imports only needed for dummy_XXX functions
 from libDecel import extractAllDecels as _extractAllDecels
 from libDecel import summarizeDecels as _summarizeDecels
-from paramsDecel import FEATURE_EXTRACT_PARAMS
-
 import cPickle as pickle
-import zmq
-
-ZMQ_CLIENT_ADDRESS_SPEC = "tcp://localhost:5555"
-ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5555"
-
-ZMQ_CLIENT = None
 
 
 #
@@ -68,20 +65,6 @@ def dummy_summarizeDecels(*args, **vargs):
 # client code
 #
 
-def get_client():
-    global ZMQ_CLIENT, ZMQ_CLIENT_ADDRESS_SPEC
-    if ZMQ_CLIENT is None:
-        context = zmq.Context()
-        socket = context.socket(zmq.REQ)
-        socket.connect(ZMQ_CLIENT_ADDRESS_SPEC)
-
-        ZMQ_CLIENT = {'context':context, 'socket':socket}
-    else:
-        context = ZMQ_CLIENT['context']
-        socket = ZMQ_CLIENT['socket']
-
-    return context, socket
-
 
 def extractAllDecels(*args, **vargs):
     print 'called extractAllDecels'
@@ -98,68 +81,3 @@ def summarizeDecels(*args, **vargs):
     print 'called summarizeDecels'
     return client_common('summarizeDecels', args, vargs)
 
-
-def client_common(fun_name, args, vargs):
-    context, socket = get_client()
-    socket.send_pyobj([fun_name, args, vargs])
-    print 'client_common -- send function request'
-    success, ret = socket.recv_pyobj()
-    print 'client_common -- received response'
-
-    if success:
-        return ret
-    else:
-        print 'client_common -- received exception'
-        raise Exception(ret)
-
-
-#
-# Server Code
-#
-
-SERVED_FUNCTIONS = {
-    'summarizeDecels':_summarizeDecels,
-    'extractAllDecels':_extractAllDecels,
-}
-
-
-def server():
-    global SERVED_FUNCTIONS, ZMQ_SERVER_ADDRESS_SPEC
-    context = zmq.Context()
-    socket = context.socket(zmq.REP)
-    socket.bind(ZMQ_SERVER_ADDRESS_SPEC)
-
-    run = True
-    while run:
-        fun_name, args, vargs = socket.recv_pyobj()
-        'wrapLibDecel server -- received {}'.format(fun_name)
-
-        if fun_name == 'exit':
-            # terminate gracefully
-            socket.send_pyobj([True, 'byebye'])
-            run = False
-
-        elif fun_name in SERVED_FUNCTIONS:
-            # special case handling for
-            if fun_name == 'extractAllDecels':
-                vargs['allExtractorParams'] = FEATURE_EXTRACT_PARAMS
-
-            # execute function call locally
-            try:
-                ret = SERVED_FUNCTIONS[fun_name](*args, **vargs)
-
-                print 'wrapLibDecel server -- returning response'
-                socket.send_pyobj([True, ret])
-            except Exception, e:
-                print 'wrapLibDecel server -- returning exception {}'.format(e)
-                socket.send_pyobj([False, e])
-        else:
-            # unknown function
-            msg = 'wrapLibDecel server -- Unknown function {}'.format(fun_name)
-            print msg
-            socket.send_pyobj([False, msg])
-
-
-# If called at top level, start server
-if __name__ == '__main__':
-    server()
