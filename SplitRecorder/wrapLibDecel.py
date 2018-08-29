@@ -7,6 +7,9 @@ from paramsDecel import FEATURE_EXTRACT_PARAMS
 import cPickle as pickle
 import zmq
 
+ZMQ_CLIENT_ADDRESS_SPEC = "tcp://localhost:5555"
+ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5555"
+
 ZMQ_CLIENT = None
 
 
@@ -66,11 +69,11 @@ def dummy_summarizeDecels(*args, **vargs):
 #
 
 def get_client():
-    global ZMQ_CLIENT
+    global ZMQ_CLIENT, ZMQ_CLIENT_ADDRESS_SPEC
     if ZMQ_CLIENT is None:
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
-        socket.connect("tcp://localhost:5555")
+        socket.connect(ZMQ_CLIENT_ADDRESS_SPEC)
 
         ZMQ_CLIENT = {'context':context, 'socket':socket}
     else:
@@ -121,10 +124,10 @@ SERVED_FUNCTIONS = {
 
 
 def server():
-    global SERVED_FUNCTIONS
+    global SERVED_FUNCTIONS, ZMQ_SERVER_ADDRESS_SPEC
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind("tcp://*:5555")
+    socket.bind(ZMQ_SERVER_ADDRESS_SPEC)
 
     run = True
     while run:
