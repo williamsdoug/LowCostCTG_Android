@@ -6,6 +6,14 @@
 #
 
 
+# Developer feature:  Support emulation using existing .wav file recording
+ENABLE_EMULATE = False
+EMULATION_RECORDING = 'sample.wav'
+EMULATION_DELAY = 1.0/8       # Normal Speed @ 8 1024 frames per second
+#EMULATION_DELAY = 1.0/8/4     # 4x speedup
+
+
+
 import threading
 import pyaudio
 import wave
@@ -36,6 +44,10 @@ class audio_recorder:
                  tachycardia=THRESH_FETAL_TACHYCARDIA,
                  bradycardia=THRESH_FETAL_BRADYCARDIA,
                  ):
+
+        if ENABLE_EMULATE:
+            infile = EMULATION_RECORDING
+
         # copy params
         self.infile = infile
         self.outfile = outfile
@@ -106,6 +118,7 @@ class audio_recorder:
                 self.sampwidth,self.format,self.framerate, self.channels)
 
             assert self.framerate == 8000
+            self.start_time = time.time()
             # TODO:  Add code for framerates other than 8000   frame_rate_actual
         else:
             self.recording_queue = Queue.Queue()
@@ -138,6 +151,10 @@ class audio_recorder:
                 self.raw_audio = None
             else:
                 self.raw_audio = data
+
+            if self.infile == EMULATION_RECORDING:
+                time.sleep(EMULATION_DELAY)
+
             return segment
         else:
             #data = self.stream_mic.read(self.chunk_size)
