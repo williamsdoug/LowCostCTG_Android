@@ -106,6 +106,7 @@ class audio_recorder:
                 self.sampwidth,self.format,self.framerate, self.channels)
 
             assert self.framerate == 8000
+            self.start_time = time.time()
             # TODO:  Add code for framerates other than 8000   frame_rate_actual
         else:
             self.recording_queue = Queue.Queue()

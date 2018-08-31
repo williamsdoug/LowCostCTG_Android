@@ -7,10 +7,11 @@
 
 
 # Developer feature:  Support emulation using existing .wav file recording
-ENABLE_EMULATE = False
+ENABLE_EMULATE = True
 EMULATION_RECORDING = 'sample.wav'
-EMULATION_DELAY = 1.0/8       # Normal Speed @ 8 1024 frames per second
+#EMULATION_DELAY = 1.0/8       # Normal Speed
 #EMULATION_DELAY = 1.0/8/4     # 4x speedup
+EMULATION_DELAY = 1.0/8/16     # 4x speedup
 
 
 
@@ -37,8 +38,9 @@ class audio_recorder:
     stopped = threading.Event()
 
     def __init__(self, infile, outfile=None,
-                 chunk_size=1024, frame_rate=8000, enable_playback=True,
-                 update_callback=None, completion_callback=None,
+                 chunk_size=1000, frame_rate=8000, enable_playback=True,
+                 update_callback=None,
+                 completion_callback=None,
                  audio_in_chan=None, audio_out_chan= None,
                  extractor_params={},
                  tachycardia=THRESH_FETAL_TACHYCARDIA,
@@ -239,11 +241,9 @@ class audio_recorder:
         hd_err = ErrorDetector(**ERROR_DETECTOR_ARGS)
         zc_err = ErrorDetector(**ERROR_DETECTOR_ARGS)
 
-        extractor = StaticExtractor(transformer=hd, errorDetector=hd_err,
-                                    update_callback=self.update_callback, name='envelope',
+        extractor = StaticExtractor(transformer=hd, errorDetector=hd_err, name='envelope',
                                     **EXTRACTOR_ARGS)
-        zc_extractor = StaticExtractor(transformer=zc, errorDetector=zc_err,
-                                       update_callback=self.update_callback, name='pitch',
+        zc_extractor = StaticExtractor(transformer=zc, errorDetector=zc_err, name='pitch',
                                        **EXTRACTOR_ARGS)
 
         self.open_audio_input()
@@ -253,15 +253,26 @@ class audio_recorder:
         segment = self.get_audio_data()                                # prime the pump
         while self.enabled.is_set() and len(segment) > 0:
             # Process data through Hilbert Transformer
+            prior_count = extractor.get_results_count()
             sigD = scipy.signal.decimate(segment, 8, zero_phase=True)  # Downsample to 1K samples/second
             hd.addData(sigD)                                           # compute envelope using hilbert
             extractor.extract_incremental()                            # now compute instantaneous HR
+            delta_hd = extractor.get_results_count() - prior_count
 
             # Process data through ZC transformer
+            prior_count = zc_extractor.get_results_count()
             zc.addData(segment)                                         # compute pitch
             zc_extractor.extract_incremental()                          # now compute instantaneous HR
+            delta_zc =  zc_extractor.get_results_count() - prior_count
 
-            self.output_data(segment)                                  # output data to file or speakers, as needed
+            # perform callback if new data
+            if self.update_callback and delta_hd > 0 or delta_zc > 0:
+                if extractor.get_results_count() == zc_extractor.get_results_count():
+                    results = {'envelope': extractor.get_results(),
+                               'pitch': zc_extractor.get_results()}
+                    self.update_callback(results)
+
+            self.output_data(segment)
 
             # Get Next Data
             if not self.enabled.is_set():

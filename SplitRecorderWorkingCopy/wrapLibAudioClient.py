@@ -1,4 +1,8 @@
-from libAudio import audio_recorder as _audio_recorder
+#from libAudio import audio_recorder as _audio_recorder
+# from libAudioEmulate import audio_recorder as _audio_recorder
+from wrapLibAudioServer import audio_recorder as _audio_recorder
+
+from libUltrasound import combineExtractionResults
 
 #
 # TODO:
@@ -30,12 +34,13 @@ class audio_recorder:
         self.proxy_audio_recorder = _audio_recorder(*args, **kwargs)
 
 
-    def proxy_update_callback(self, *args, **kwargs):
-        self.update_callback(*args, **kwargs)
+    # audio_recording_update(self, extractor_instance, extractor_name, current_pos):
+    def proxy_update_callback(self, results):
+        self.update_callback(results)
 
-
-    def proxy_completion_callback(self, *args, **kwargs):
-        self.completion_callback(*args, **kwargs)
+    # audio_recording_finished(self, results):
+    def proxy_completion_callback(self, results):
+        self.completion_callback(results)
 
 
     def stop(self, isCancelled=False):

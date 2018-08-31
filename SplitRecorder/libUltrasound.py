@@ -539,6 +539,9 @@ class Extractor:
     def extract_incremental(self):
         raise Exception('Abstract method extract_incremental not implemented')
 
+    def get_results_count(self):
+        return len(self.results_pos)
+
     def get_results(self, asNumpy=True):
 
         if self.errorDetector:

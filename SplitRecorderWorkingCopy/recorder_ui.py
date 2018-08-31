@@ -52,7 +52,9 @@ import gc
 
 from libAudioDetect import audio_detect, select_preferred_io
 #from libAudio import audio_recorder
-from libAudioEmulate import audio_recorder
+#from libAudioEmulate import audio_recorder
+#from wrapLibAudioServer import audio_recorder
+from wrapLibAudioClient import audio_recorder
 
 
 from libUltrasound import combineExtractionResults
@@ -1098,45 +1100,37 @@ class PlotPopup(Popup):
         )
 
 
-    def audio_recording_update(self, extractor_instance, extractor_name, current_pos):
-        # Reduce plot update rate when in analysis mode
 
-        results = extractor_instance.get_results(asNumpy=False)
+    def audio_recording_update(self, results):
         if self.audio_start_time is None:
-            self.audio_start_time = time.time()-len(results['pos']) - EXTRACTOR_ARGS['corrWidth']/2000.0
+            self.audio_start_time = time.time()-len(results['envelope']['pos']) - EXTRACTOR_ARGS['corrWidth']/2000.0
             # time of first result
             # minus number of samples (at 1 sec each)
             # minus 50% of corrWidth is lag due to offset from center of autocorrelation window.
 
-        self.data[extractor_name] = results
+        for k, v in results.items():
+            self.data[k] = v
 
-        print '{}: {:0.0f} bpm @ {:0.0f} sec -- cor: {:0.2f}  rel: {:0.2f}'.format(
-            extractor_name,
-            results['hr'][-1], results['pos'][-1],
-            results['cor'][-1], results['rel'][-1])
+        if 'combined' in results and len(results['combined']['pos']) > 0:
+            current_pos = len(results['combined']['pos'])
+        else:
+            current_pos = 0
+
+        if ('combined' in results and self.enable_realtime_pattern
+                and current_pos != 0 and current_pos % 60 == 0):
+            self.data['annotations'] = self.detectPatternsHR()
+
+        for extractor_name, extractor_results in results.items():
+            if len(extractor_results['pos']) == 0 or extractor_name =='combined':
+                continue
+            print '* {}: {:0.0f} bpm @ {:0.0f} sec -- cor: {:0.2f}  rel: {:0.2f}'.format(
+                extractor_name,
+                extractor_results['hr'][-1], extractor_results['pos'][-1],
+                extractor_results['cor'][-1], extractor_results['rel'][-1])
+        if 'combined' in results and len(results['combined']['pos']) > 0:
+            print '* {}: {:0.0f} bpm @ {:0.0f} sec'.format(
+                'combined', results['combined']['hr'][-1], results['combined']['pos'][-1])
         sys.stdout.flush()
-
-        try:
-            if 'hr' in self.data['envelope'] and 'hr' in self.data['pitch']:
-                N = min(len(self.data['envelope']['hr']), len(self.data['pitch']['hr']))
-                combinedHR, combinedMask = combineExtractionResults(np.array(self.data['envelope']['hr'][:N]),
-                                                                    np.array(self.data['pitch']['hr'][:N]))
-                pos = self.data['envelope']['pos'][:len(combinedHR)]
-                self.data['combined'] = {'hr': combinedHR, 'valid': combinedMask, 'pos':pos}
-            elif 'hr' in self.data['envelope']:
-                self.data['combined'] = self.data['envelope']
-            else:
-                self.data['combined'] = self.data['pitch']
-
-            if self.enable_realtime_pattern and current_pos != 0 and current_pos % 60 == 0:
-                self.data['annotations'] = self.detectPatternsHR()
-
-        except Exception, e:
-            print 'Exception during combineExtractionResults', e
-
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
 
         self.current_plot_state['hr_updated'] = True
 
@@ -1146,24 +1140,17 @@ class PlotPopup(Popup):
             Clock.schedule_once(lambda x: self.do_gc, 0)
 
 
+
     def audio_recording_finished(self, results):
-        self.data['envelope'] = results['envelope']
-        self.data['pitch'] = results['pitch']
+        end_time = int(time.time())
+        for k, v in results.items():
+            self.data[k] = v
 
         start_time = self.audio_thread.get_start_time()
         self.data['start_time'] = int(start_time)
-        self.data['end_time'] = int(time.time())
+        self.data['end_time'] = end_time
         self.data['recording_duration'] = (self.data['end_time'] - self.data['start_time'])/60.0
         print self.data['recording_duration'], self.data['end_time'], self.data['start_time']
-
-        try:
-            combinedHR, combinedMask = combineExtractionResults(np.array(self.data['envelope']['hr']),
-                                                                np.array(self.data['pitch']['hr']))
-            pos = self.data['envelope']['pos'][:len(combinedHR)]
-            self.data['combined'] = {'hr': combinedHR, 'valid': combinedMask, 'pos': pos}
-        except Exception:
-            print 'recording_finished - exception during combineExtractionResults'
-            pass
 
         self.audio_thread = None
 
