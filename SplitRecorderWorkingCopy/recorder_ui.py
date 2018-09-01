@@ -1028,6 +1028,7 @@ class PlotPopup(Popup):
         if status in ['done']:
             self.recording_postprocessing()
             if self.completion_callback:
+                self.update_timestamps()
                 self.completion_callback({
                     'start_time': self.data['start_time'],
                     'recording_duration': self.data['recording_duration']})
@@ -1051,6 +1052,7 @@ class PlotPopup(Popup):
     def stop_all_recording_threads(self, isCancelled):
         if self.audio_thread is not None:
             self.audio_thread.stop(isCancelled=isCancelled)
+            self.audio_thread.teardown()
 
         if self.toco_listener is not None:
             self.toco_listener.stop(isCancelled=isCancelled)
@@ -1141,19 +1143,25 @@ class PlotPopup(Popup):
             Clock.schedule_once(lambda x: self.do_gc, 0)
 
 
+    def update_timestamps(self):
+        # Note: may be called more than once
+        if 'end_time' not in self.data or self.data['end_time']:
+            self.data['end_time'] = int(time.time())
+        if 'start_time' not in self.data or self.data['start_time']:
+            self.data['start_time'] = int(self.audio_thread.get_start_time())
+
+        if 'recording_duration' not in self.data or self.data['recording_duration']:
+            self.data['recording_duration'] = (self.data['end_time'] - self.data['start_time']) / 60.0
+            print self.data['recording_duration'], self.data['end_time'], self.data['start_time']
+
+
 
     def audio_recording_finished(self, results):
-        end_time = int(time.time())
+        self.update_timestamps()
         for k, v in results.items():
             self.data[k] = v
 
-        start_time = self.audio_thread.get_start_time()
-        self.data['start_time'] = int(start_time)
-        self.data['end_time'] = end_time
-        self.data['recording_duration'] = (self.data['end_time'] - self.data['start_time'])/60.0
-        print self.data['recording_duration'], self.data['end_time'], self.data['start_time']
-
-        self.audio_thread = None
+        #self.audio_thread = None  # is this needed ?
 
 
     #

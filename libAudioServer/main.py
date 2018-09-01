@@ -8,7 +8,7 @@ import zmq
 ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5556"
 ZMQ_PUB_ADDRESS_SPEC = "tcp://*:5557"
 PREFIX = 'audio_recorder__'
-
+XMQ_SUB_POLLER_GENERATION = None
 #
 # Server Code
 #
@@ -34,14 +34,17 @@ class Server:
 
     # Convert callbacks to pub/sub message
     def update_callback(self, result):
-        self.pub_socket.send_pyobj(('update', result))
+        global XMQ_SUB_POLLER_GENERATION
+        self.pub_socket.send_pyobj(('update', XMQ_SUB_POLLER_GENERATION, result))
+
 
     def completion_callback(self, result):
-        self.pub_socket.send_pyobj(('completion', result))
+        global XMQ_SUB_POLLER_GENERATION
+        self.pub_socket.send_pyobj(('completion', XMQ_SUB_POLLER_GENERATION, result))
 
 
     def serve(self):
-        global PREFIX
+        global PREFIX, XMQ_SUB_POLLER_GENERATION
         while True:
             fun_name, args, kwargs = self.socket.recv_pyobj()
             print 'audio_recorder server -- received {}'.format(fun_name)
@@ -54,6 +57,9 @@ class Server:
                 self.report_unknown(fun_name)
             elif fun_name.endswith('__init'):
                 # Create remote object
+                XMQ_SUB_POLLER_GENERATION = kwargs['XMQ_SUB_POLLER_GENERATION']
+                del kwargs['XMQ_SUB_POLLER_GENERATION']
+
                 kwargs['update_callback'] = self.update_callback
                 kwargs['completion_callback'] = self.completion_callback
 

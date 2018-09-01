@@ -5,6 +5,7 @@ from wrapClientCommon import client_common, get_client
 import cPickle as pickle
 import threading
 import sys
+import random
 #
 # Non RPC Debug Versions
 #
@@ -51,22 +52,32 @@ class dummy_audio_recorder:
         return self.proxy_audio_recorder.get_start_time()
 
 
+    def teardown(self):
+        pass
+
+
+
 XMQ_SUB_POLLER = None
 XMQ_SUB_POLLER_MAP = None
+XMQ_SUB_POLLER_GENERATION = None
 
 
 def message_poller(*args, **kwards):
-    global XMQ_SUB_POLLER_MAP
+    global XMQ_SUB_POLLER_MAP, XMQ_SUB_POLLER_GENERATION
     context, socket = get_client('libAudioCallbacks')
     while True:
         msg = socket.recv_pyobj()
         tag = msg[0]
+        gen = msg[1]
         print 'Incoming message for {}'.format(tag)
         sys.stdout.flush()
 
-        if tag in XMQ_SUB_POLLER_MAP:
+        if gen != XMQ_SUB_POLLER_GENERATION:
+            print 'message_poller: Stale message -- {}'.format(tag)
+            sys.stdout.flush()
+        elif XMQ_SUB_POLLER_MAP and tag in XMQ_SUB_POLLER_MAP:
             try:
-                XMQ_SUB_POLLER_MAP[tag](*msg[1:])
+                XMQ_SUB_POLLER_MAP[tag](*msg[2:])
             except Exception, e:
                 print 'Exception -- message_poller -- {}'.format(e)
                 sys.stdout.flush()
@@ -93,7 +104,7 @@ class audio_recorder:
 
     def __init__(self, *args, **kwargs):
 
-        global XMQ_SUB_POLLER_MAP
+        global XMQ_SUB_POLLER_MAP, XMQ_SUB_POLLER_GENERATION
 
         if 'update_callback' in kwargs:
             self.update_callback = kwargs['update_callback']
@@ -108,10 +119,13 @@ class audio_recorder:
             self.update_callback = None
 
         # subscribe to callback messages
+        XMQ_SUB_POLLER_GENERATION = random.randint(1, 2**31)
         XMQ_SUB_POLLER_MAP = {
             'update':self.proxy_update_callback,
             'completion':self.proxy_completion_callback}
         start_message_poller()
+
+        kwargs['XMQ_SUB_POLLER_GENERATION'] = XMQ_SUB_POLLER_GENERATION
 
         client_common('audio_recorder__init', args, kwargs, endpoint='libAudio')
 
@@ -146,3 +160,11 @@ class audio_recorder:
 
     def get_start_time(self):
         return client_common('audio_recorder__get_start_time', [], {}, endpoint='libAudio')
+
+
+    def teardown(self):
+        global XMQ_SUB_POLLER_MAP, XMQ_SUB_POLLER_GENERATION
+        print 'calling teardown'
+        XMQ_SUB_POLLER_MAP = None
+        XMQ_SUB_POLLER_GENERATION = None
+

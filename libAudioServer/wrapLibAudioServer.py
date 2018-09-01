@@ -85,3 +85,5 @@ class audio_recorder:
     def get_start_time(self):
         return self.proxy_audio_recorder.get_start_time()
 
+    def teardown(self):
+        pass
