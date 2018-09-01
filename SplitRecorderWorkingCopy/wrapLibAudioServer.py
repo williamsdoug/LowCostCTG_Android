@@ -19,9 +19,7 @@ import traceback
 
 class audio_recorder:
 
-    def __init__(self, *args,
-                 **kwargs
-                 ):
+    def __init__(self, *args, **kwargs):
 
         if 'update_callback' in kwargs:
             self.update_callback = kwargs['update_callback']
@@ -37,6 +35,8 @@ class audio_recorder:
             self.completion_callback = None
 
         self.proxy_audio_recorder = _audio_recorder(*args, **kwargs)
+
+        print 'server proxy_audio_recorder returning from init'
 
 
     def recording_callback_common(self, results):
@@ -85,3 +85,5 @@ class audio_recorder:
     def get_start_time(self):
         return self.proxy_audio_recorder.get_start_time()
 
+    def teardown(self):
+        pass

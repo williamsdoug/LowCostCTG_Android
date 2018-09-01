@@ -14,7 +14,7 @@
 EMULATION_RECORDING = 'sample.wav'
 #EMULATION_DELAY = 1.0/8       # Normal Speed
 #EMULATION_DELAY = 1.0/8/4     # 4x speedup
-EMULATION_DELAY = 1.0/8/16     # 4x speedup
+EMULATION_DELAY = 1.0/8/2     # 4x speedup
 
 
 #
@@ -90,6 +90,8 @@ class audio_recorder:
         self.thread = threading.Thread(target=self.processRecording)
         self.thread.daemon = True
         self.thread.start()
+
+        print 'audio_recorder returning from init'
 
 
     # alternative to using python wave library
