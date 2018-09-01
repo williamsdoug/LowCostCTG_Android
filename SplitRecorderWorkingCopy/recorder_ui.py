@@ -51,9 +51,10 @@ import gc
 
 
 from libAudioDetect import audio_detect, select_preferred_io
-#from libAudio import audio_recorder
+
 #from libAudioEmulate import audio_recorder
 #from wrapLibAudioServer import audio_recorder
+#from wrapLibAudioClient import dummy_audio_recorder as audio_recorder
 from wrapLibAudioClient import audio_recorder
 
 

@@ -88,6 +88,7 @@ class audio_recorder:
         self.stopped.clear()
         self.isCancelled = False
         self.thread = threading.Thread(target=self.processRecording)
+        self.thread.daemon = True
         self.thread.start()
 
 

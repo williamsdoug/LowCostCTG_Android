@@ -4,9 +4,9 @@ from libAudioEmulate import audio_recorder as _audio_recorder
 from libUltrasound import combineExtractionResults
 import numpy as np
 
-
 import sys
 import traceback
+
 
 #
 # TODO:

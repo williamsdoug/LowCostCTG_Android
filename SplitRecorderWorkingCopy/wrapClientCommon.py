@@ -6,7 +6,9 @@ import zmq
 
 # Address for each RPC server
 ZMQ_CLIENT_ADDRESS_SPEC = {
-    'libDecel':"tcp://localhost:5555",
+    'libDecel':{'addr':"tcp://localhost:5555", 'type':'req'},
+    'libAudio':{'addr':"tcp://localhost:5556", 'type':'req'},
+    'libAudioCallbacks':{'addr':"tcp://localhost:5557",'type':'sub'},
 }
 
 ZMQ_CLIENT = {}
@@ -21,9 +23,16 @@ def get_client(endpoint):
     if endpoint not in ZMQ_CLIENT:
 
         assert endpoint in ZMQ_CLIENT_ADDRESS_SPEC
+        entry = ZMQ_CLIENT_ADDRESS_SPEC[endpoint]
         context = zmq.Context()
-        socket = context.socket(zmq.REQ)
-        socket.connect(ZMQ_CLIENT_ADDRESS_SPEC[endpoint])
+        if entry['type'] == 'req':
+            socket = context.socket(zmq.REQ)
+        elif entry['type'] == 'sub':
+            socket = context.socket(zmq.SUB)
+
+        socket.connect(entry['addr'])
+        if entry['type'] == 'sub':
+            socket.setsockopt(zmq.SUBSCRIBE, b"")
 
         ZMQ_CLIENT[endpoint] = {'context':context, 'socket':socket}
     else:
