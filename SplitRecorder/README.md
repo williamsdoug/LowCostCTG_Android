@@ -1,1 +1,0 @@
-# LowCostCTG_Android

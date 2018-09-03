@@ -6,17 +6,20 @@
 #
 
 
-# Developer feature:  Support emulation using existing .wav file recording
-ENABLE_EMULATE = True
-EMULATION_RECORDING = 'sample.wav'
-#EMULATION_DELAY = 1.0/8       # Normal Speed
-#EMULATION_DELAY = 1.0/8/4     # 4x speedup
-EMULATION_DELAY = 1.0/8/16     # 4x speedup
+# Emulate libAudio using existing .wav file recording
+# Removes dependency on pyaudio
+#
+# API compatible with libAudio
+
+from CONFIG import EMULATION_RECORDING, EMULATION_DELAY
 
 
+#
+# Note:  File currently uses pyaudio to read recording file.
+#        Alternative is to use scipy.io.wavfile.read(fname)
+#        see: self.getSampleData
 
 import threading
-import pyaudio
 import wave
 import numpy as np
 import scipy
@@ -47,8 +50,7 @@ class audio_recorder:
                  bradycardia=THRESH_FETAL_BRADYCARDIA,
                  ):
 
-        if ENABLE_EMULATE:
-            infile = EMULATION_RECORDING
+        infile = EMULATION_RECORDING
 
         # copy params
         self.infile = infile
@@ -86,6 +88,20 @@ class audio_recorder:
         self.thread.daemon = True
         self.thread.start()
 
+        print 'audio_recorder returning from init'
+
+
+    # alternative to using python wave library
+    # def getSampleData(self, fname=EMULATION_RECORDING):
+    #     from scipy.io import wavfile
+    #     self.framerate, self.sample_data = scipy.io.wavfile.read(fname)
+    #     self.sample_data_ptr = 0
+    #     self.sample_data_len = len(self.sample_data)
+    #
+    #     print 'Sample data {} -- rate: {}  shape: {}'.format(
+    #         fname, self.framerate, self.sample_data.shape)
+    #     assert self.framerate == 8000
+
 
     def stop(self, isCancelled=False):
         self.isCancelled = isCancelled
@@ -110,38 +126,15 @@ class audio_recorder:
             self.sampwidth = self.wf_in.getsampwidth()
             self.framerate = self.wf_in.getframerate()    # get actual frame rate
 
-            p_temp = pyaudio.PyAudio()
-            self.format = p_temp.get_format_from_width(self.sampwidth)
-            p_temp.terminate()
-            #p_temp.close()
-
             self.scaled_chunk_size = self.chunk_size * self.channels
 
-            print 'Sample Width: {} Format: {}  Framerate: {}  Channels: {}'.format(
-                self.sampwidth,self.format,self.framerate, self.channels)
+            print 'Sample Width: {}   Framerate: {}  Channels: {}'.format(
+                self.sampwidth, self.framerate, self.channels)
 
             assert self.framerate == 8000
             self.start_time = time.time()
             # TODO:  Add code for framerates other than 8000   frame_rate_actual
-        else:
-            self.recording_queue = Queue.Queue()
-            self.p_mic = pyaudio.PyAudio()
 
-            self.stream_mic =  self.p_mic.open(format=pyaudio.paInt16,
-                                               channels=1, rate=self.frame_rate, input=True,
-                                               frames_per_buffer=self.chunk_size,
-                                               input_device_index=self.audio_in_chan,
-                                               stream_callback=self.recording_callback)
-            self.start_time = time.time()
-            self.stream_mic.start_stream()
-
-
-    def recording_callback(self, in_data, frame_count, time_info, status):
-        self.recording_queue.put(in_data)
-        if status != 0:
-            print '** recording error', status, time_info
-        #return (None, pyaudio.paContinue if q.qsize() < 40 else pyaudio.paComplete)
-        return (None, pyaudio.paContinue)
 
 
     def get_audio_data(self):
@@ -159,78 +152,8 @@ class audio_recorder:
                 time.sleep(EMULATION_DELAY)
 
             return segment
-        else:
-            #data = self.stream_mic.read(self.chunk_size)
-            while self.stream_mic.is_active() and self.recording_queue.qsize() == 0:
-                time.sleep(0.1)
-            if self.recording_queue.qsize() > 0:
-                data = self.recording_queue.get()
-                self.raw_audio = data
-                segment = np.fromstring(data, '<h')
-                return segment
-            else:
-                self.raw_audio = None
-                return []
 
 
-    def close_audio_input(self):
-        """close audio input source"""
-        if self.infile is not None:
-            self.wf_in.close()
-        else:
-            self.stream_mic.stop_stream()
-            self.stream_mic.close()
-            self.p_mic.terminate()
-
-
-    def open_output(self):
-        # open stream based on the wave object which has been input.
-        if self.enable_playback:
-            self.p_speaker = pyaudio.PyAudio()
-            try:  # hack
-                self.stream_speaker = self.p_speaker.open(format=self.format, channels=1,
-                                                          output_device_index=self.audio_out_chan,
-                                                          rate=self.framerate, output=True)
-            except Exception:
-                self.stream_speaker = self.p_speaker.open(format=pyaudio.paInt16, channels=1,
-                                                          output_device_index=self.audio_out_chan,
-                                                          rate=8000, output=True)
-        if self.outfile is not None:
-            self.wf_out = wave.open(self.outfile, 'wb')
-            self.wf_out.setnchannels(1)
-
-            p_temp = pyaudio.PyAudio()
-            self.wf_out.setsampwidth(p_temp.get_sample_size(pyaudio.paInt16))
-            p_temp.terminate()
-            #p_temp.close()
-
-            self.wf_out.setframerate(self.frame_rate)
-            pass
-
-
-    def output_data(self, segment):
-        if not self.enable_playback and self.outfile is None:
-            return
-
-        if self.raw_audio:     # try to use existing raw format data, if available
-            data = self.raw_audio
-        else:                  # otherwise convert to packed short int array format
-            data = ''.join([struct.pack('<h', x) for x in segment.tolist()])
-
-        if self.enable_playback:
-            self.stream_speaker.write(data)
-
-        if self.outfile is not  None:
-            self.wf_out.writeframes(data)
-
-
-    def close_output(self):
-        if self.enable_playback:
-            self.stream_speaker.close()
-            self.p_speaker.terminate()
-
-        if self.outfile is not None:
-            self.wf_out.close()
 
 
     def processRecording(self):
@@ -248,7 +171,6 @@ class audio_recorder:
                                        **EXTRACTOR_ARGS)
 
         self.open_audio_input()
-        self.open_output()
 
         # Loop through audio data
         segment = self.get_audio_data()                                # prime the pump
@@ -273,8 +195,6 @@ class audio_recorder:
                                'pitch': zc_extractor.get_results()}
                     self.update_callback(results)
 
-            self.output_data(segment)
-
             # Get Next Data
             if not self.enabled.is_set():
                 print 'breaking'
@@ -282,8 +202,6 @@ class audio_recorder:
             segment = self.get_audio_data()                            # get data for next iteration
 
         # cleanup stuff.
-        self.close_audio_input()
-        self.close_output()
         if not self.isCancelled:
             results = {'envelope':extractor.get_results(),
                        'pitch':zc_extractor.get_results()}

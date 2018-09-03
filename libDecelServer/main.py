@@ -5,9 +5,7 @@ from paramsDecel import FEATURE_EXTRACT_PARAMS
 
 import zmq
 
-
-ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5555"
-
+from CONFIG import ZMQ_SERVER_ADDRESS_SPEC
 
 #
 # Server Code

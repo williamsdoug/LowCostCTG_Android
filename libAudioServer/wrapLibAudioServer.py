@@ -1,5 +1,10 @@
-#from libAudio import audio_recorder as _audio_recorder
-from libAudioEmulate import audio_recorder as _audio_recorder
+
+from CONFIG import USE_LIB_AUDIO_EMULATE
+
+if USE_LIB_AUDIO_EMULATE:
+    from libAudio import audio_recorder as _audio_recorder
+else:
+    from libAudioEmulate import audio_recorder as _audio_recorder
 
 from libUltrasound import combineExtractionResults
 import numpy as np

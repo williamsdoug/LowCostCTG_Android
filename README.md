@@ -16,23 +16,16 @@ Porting of LowCostCTG / Combined Recorder to a client (UI) and a set of services
 
 ### Overall Structure
 
-#### SplitRecorder
 
-- Based on Combined Recorder
-- Configurable to operate standalone or by making IPC/RPC calls to standalone services
-- wrapLibAudioCommon.py responsible for basic IPC/RPC plumbing and callback handling
-  - CONTAINS IP ADDRESS AND PORTS for served functions.  Update as appropriate
-  - callbacks handled using pub/sub
-- library specific wrappers control inclusion of selected remote services
-  - wrapLibAudioClient.py - Basic audio processing and realtime FHR extraction
-    - use import dummmy_extractAllDecels and dummy_summarizeDecels in recorder_ui.py for local (non-served) configuration
-  - wrapLibDecel.py - FHR pattern detection code
-    - use import dummmy_audio_recorder in recorder_ui.py for local (non-served) configuration
- - When configued for client/server operation, the following libraries can be demoved from client-side build:
-   - libAudio.py, libAudioEmulate.py, libUltrasound.py, libQuality.py, wrapLibAudioServer.py
-     - Also remove dummy functions and related imports from wrapLibAudioClient.py
-   - libDecel.py, libSignalProcessing
-     - Also remove dummy functions from wrapLibDecel.py
+
+#### LowCostCTG_Client
+
+- Minimal Client-only version.  Primarily UI and data management
+- Does not include any code associated with served operations 
+- Functions not yet moved to server implementation:
+  - TocoPatch processing
+  - Selective functions used when importing data
+  - Rules engine and related code 
      
 
 #### libAudioServer
@@ -48,3 +41,10 @@ Porting of LowCostCTG / Combined Recorder to a client (UI) and a set of services
 - Exposes summarizeDecels and extractAllDecels from libDecel.py as RPC
 - libDecelServer/main.py includes ZeroMQ RPC management and gasket
   
+
+#### LowCostCTG_Development
+
+- Integrated version including LowCostCTG_Client, libAudioServer and libDecelServer
+- Can selectively enables which functions utilize RPC and which operations are performed locally
+  - Selected in CONFIG
+- See documentation for LowCostCTG_Client, libAudioServer and libDecelServer for other CONFIG.py copnfiguration options

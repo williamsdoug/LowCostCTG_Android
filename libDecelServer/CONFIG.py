@@ -1,0 +1,3 @@
+
+ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5555"
+

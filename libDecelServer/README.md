@@ -14,7 +14,7 @@
 
 
 ### Network configuration
-- Update main.py to reflect correct port address, as needed
+- Update CONFIG.py to reflect correct port address, as needed
 
 
 

@@ -11,10 +11,7 @@
 #
 # API compatible with libAudio
 
-EMULATION_RECORDING = 'sample.wav'
-#EMULATION_DELAY = 1.0/8       # Normal Speed
-#EMULATION_DELAY = 1.0/8/4     # 4x speedup
-EMULATION_DELAY = 1.0/8/2     # 4x speedup
+from CONFIG import EMULATION_RECORDING, EMULATION_DELAY
 
 
 #

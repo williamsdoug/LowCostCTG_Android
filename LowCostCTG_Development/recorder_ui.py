@@ -49,16 +49,22 @@ import os
 import platform
 import gc
 
+from CONFIG import LIBAUDIO_USE_REMOTE, LIBDECEL_USE_REMOTE
+
+if LIBAUDIO_USE_REMOTE:
+    from wrapLibAudioClient import audio_recorder
+else:
+    #from wrapLibAudioServer import audio_recorder
+    from wrapLibAudioClientDummy import audio_recorder
+
+if LIBDECEL_USE_REMOTE:
+    from wrapLibDecel import extractAllDecels, summarizeDecels
+else:
+    #from libDecel import extractAllDecels, summarizeDecels
+    from wrapLibDecelDummy import extractAllDecels, summarizeDecels
+
 
 from libAudioDetect import audio_detect, select_preferred_io
-
-#from wrapLibAudioServer import audio_recorder
-from wrapLibAudioClientDummy import audio_recorder
-#from wrapLibAudioClient import audio_recorder
-
-#from libDecel import extractAllDecels, summarizeDecels
-#from wrapLibDecelDummy import extractAllDecels, summarizeDecels
-from wrapLibDecel import extractAllDecels, summarizeDecels
 
 
 from libUltrasound import combineExtractionResults

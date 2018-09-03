@@ -5,14 +5,8 @@
 #  All Rights Reserved
 #
 
-
 # Developer feature:  Support emulation using existing .wav file recording
-ENABLE_EMULATE = True
-EMULATION_RECORDING = 'sample.wav'
-#EMULATION_DELAY = 1.0/8       # Normal Speed
-#EMULATION_DELAY = 1.0/8/4     # 4x speedup
-EMULATION_DELAY = 1.0/8/16     # 4x speedup
-
+from CONFIG import ENABLE_EMULATE, EMULATION_RECORDING, EMULATION_DELAY
 
 
 import threading

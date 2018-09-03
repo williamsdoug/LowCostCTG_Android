@@ -4,9 +4,8 @@ from wrapLibAudioServer import audio_recorder
 
 import zmq
 
+from CONFIG import ZMQ_SERVER_ADDRESS_SPEC, ZMQ_PUB_ADDRESS_SPEC
 
-ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5556"
-ZMQ_PUB_ADDRESS_SPEC = "tcp://*:5557"
 PREFIX = 'audio_recorder__'
 XMQ_SUB_POLLER_GENERATION = None
 #
