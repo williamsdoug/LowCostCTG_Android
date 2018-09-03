@@ -5,6 +5,8 @@ __pycache__/
 
 
 .idea/*
+controller.ini
+*/controller.ini
 
 SplitRecorder/old
 

@@ -52,10 +52,13 @@ import gc
 
 from libAudioDetect import audio_detect, select_preferred_io
 
-#from libAudioEmulate import audio_recorder
 #from wrapLibAudioServer import audio_recorder
-#from wrapLibAudioClient import dummy_audio_recorder as audio_recorder
-from wrapLibAudioClient import audio_recorder
+from wrapLibAudioClientDummy import audio_recorder
+#from wrapLibAudioClient import audio_recorder
+
+#from libDecel import extractAllDecels, summarizeDecels
+#from wrapLibDecelDummy import extractAllDecels, summarizeDecels
+from wrapLibDecel import extractAllDecels, summarizeDecels
 
 
 from libUltrasound import combineExtractionResults
@@ -66,10 +69,6 @@ from libTocopatchDevice import HeartyPatch_Listener
 
 
 from libUC import findUC
-
-from libDecel import extractAllDecels, summarizeDecels
-#from wrapLibDecel import extractAllDecels, summarizeDecels
-
 
 
 from libSignalProcessing import tolist                   # New
