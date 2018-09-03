@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from wrapLibAudioServer import audio_recorder
+from libUltrasound import combineExtractionResults
 
 import zmq
 
@@ -52,6 +53,14 @@ class Server:
                 # terminate gracefully
                 self.socket.send_pyobj([True, 'byebye'])
                 return
+            elif fun_name == 'combineExtractionResults':
+                try:
+                    ret = combineExtractionResults(*args, **kwargs)
+                    self.socket.send_pyobj([True, ret])
+                except Exception, e:
+                    print 'audio_recorder server -- combineExtractionResults exception {}'.format(e)
+                    self.socket.send_pyobj([False, e])
+            # process RPC called related to audio_recorder object
             elif not fun_name.startswith(PREFIX):
                 self.report_unknown(fun_name)
             elif fun_name.endswith('__init'):

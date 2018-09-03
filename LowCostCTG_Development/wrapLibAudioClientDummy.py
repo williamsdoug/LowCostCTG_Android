@@ -1,6 +1,6 @@
 
 from wrapLibAudioServer import audio_recorder as _audio_recorder
-
+from libUltrasound import combineExtractionResults
 
 #
 # Non RPC Debug Versions

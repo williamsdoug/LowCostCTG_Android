@@ -49,14 +49,14 @@ import os
 import platform
 import gc
 
-from wrapLibAudioClient import audio_recorder
+from wrapLibAudioClient import audio_recorder, combineExtractionResults
 from wrapLibDecel import extractAllDecels, summarizeDecels
 
 
 from libAudioDetect import audio_detect, select_preferred_io
 
 
-from libUltrasound import combineExtractionResults
+#from libUltrasound import combineExtractionResults
 from paramsUltrasound import EXTRACTOR_ARGS
 
 from libTocopatchSignal import ProcessUC, isolateUC, UC_DEFAULT_PARAMS

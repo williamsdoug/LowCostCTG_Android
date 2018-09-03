@@ -5,8 +5,6 @@ import threading
 import sys
 import random
 
-
-
 XMQ_SUB_POLLER = None
 XMQ_SUB_POLLER_MAP = None
 XMQ_SUB_POLLER_GENERATION = None
@@ -48,6 +46,10 @@ def start_message_poller():
     print 'callback listener started'
 
 
+
+def combineExtractionResults(*args, **vargs):
+    print 'called combineExtractionResults'
+    return client_common('combineExtractionResults', args, vargs, endpoint='libAudio')
 
 
 class audio_recorder:

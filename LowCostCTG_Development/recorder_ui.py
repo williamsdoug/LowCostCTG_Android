@@ -52,10 +52,10 @@ import gc
 from CONFIG import LIBAUDIO_USE_REMOTE, LIBDECEL_USE_REMOTE
 
 if LIBAUDIO_USE_REMOTE:
-    from wrapLibAudioClient import audio_recorder
+    from wrapLibAudioClient import audio_recorder, combineExtractionResults
 else:
     #from wrapLibAudioServer import audio_recorder
-    from wrapLibAudioClientDummy import audio_recorder
+    from wrapLibAudioClientDummy import audio_recorder, combineExtractionResults
 
 if LIBDECEL_USE_REMOTE:
     from wrapLibDecel import extractAllDecels, summarizeDecels
@@ -67,7 +67,7 @@ else:
 from libAudioDetect import audio_detect, select_preferred_io
 
 
-from libUltrasound import combineExtractionResults
+#from libUltrasound import combineExtractionResults
 from paramsUltrasound import EXTRACTOR_ARGS
 
 from libTocopatchSignal import ProcessUC, isolateUC, UC_DEFAULT_PARAMS
