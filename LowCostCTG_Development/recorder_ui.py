@@ -1059,6 +1059,7 @@ class PlotPopup(Popup):
 
         if self.toco_listener is not None:
             self.toco_listener.stop(isCancelled=isCancelled)
+            self.toco_listener.teardown()
 
         if self.audio_thread is not None:
             self.audio_thread.wait()
