@@ -2,6 +2,7 @@
 
 from libDecel import extractAllDecels, summarizeDecels
 from paramsDecel import FEATURE_EXTRACT_PARAMS
+from libUC import findUC
 
 import zmq
 
@@ -14,6 +15,7 @@ from CONFIG import ZMQ_SERVER_ADDRESS_SPEC
 SERVED_FUNCTIONS = {
     'summarizeDecels':summarizeDecels,
     'extractAllDecels':extractAllDecels,
+    'findUC':findUC,
 }
 
 

@@ -51,7 +51,7 @@ import gc
 
 from wrapLibAudioClient import audio_recorder, combineExtractionResults
 from wrapLibDecel import extractAllDecels, summarizeDecels
-
+from wrapLibUC import findUC
 
 from libAudioDetect import audio_detect, select_preferred_io
 
@@ -63,7 +63,7 @@ from libTocopatchSignal import ProcessUC, isolateUC, UC_DEFAULT_PARAMS
 from libTocopatchDevice import HeartyPatch_Listener
 
 
-from libUC import findUC
+
 
 # Handled by wrapLibAudioDecel
 # from paramsDecel import FEATURE_EXTRACT_PARAMS

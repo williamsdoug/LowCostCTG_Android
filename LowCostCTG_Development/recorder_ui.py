@@ -59,9 +59,11 @@ else:
 
 if LIBDECEL_USE_REMOTE:
     from wrapLibDecel import extractAllDecels, summarizeDecels
+    from wrapLibUC import findUC
 else:
     #from libDecel import extractAllDecels, summarizeDecels
     from wrapLibDecelDummy import extractAllDecels, summarizeDecels
+    from libUC import findUC
 
 
 from libAudioDetect import audio_detect, select_preferred_io
