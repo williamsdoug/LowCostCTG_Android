@@ -49,7 +49,7 @@ import os
 import platform
 import gc
 
-from CONFIG import LIBAUDIO_USE_REMOTE, LIBDECEL_USE_REMOTE
+from CONFIG import LIBAUDIO_USE_REMOTE, LIBDECEL_USE_REMOTE, LIBTOCOPATCH_USE_REMOTE
 
 if LIBAUDIO_USE_REMOTE:
     from wrapLibAudioClient import audio_recorder, combineExtractionResults
@@ -65,9 +65,15 @@ else:
     from wrapLibDecelDummy import extractAllDecels, summarizeDecels
     from libUC import findUC
 
+if LIBTOCOPATCH_USE_REMOTE:
+    from wrapTocopatchClient import TocoListener
+else:
+    from wrapTocopatchClientDummy import TocoListener
+    #from wrapTocopatchServer import TocoListener
+
 
 from libAudioDetect import audio_detect, select_preferred_io
-from wrapTocopatchServer import TocoListener
+
 from libUC import findUC
 
 from paramsUltrasound import EXTRACTOR_ARGS
@@ -1208,7 +1214,6 @@ class PlotPopup(Popup):
         if not abort and result:
             self.data['uc'] = result
         self.toco_listener = None
-
 
 
     #
