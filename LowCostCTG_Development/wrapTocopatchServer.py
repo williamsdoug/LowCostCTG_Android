@@ -15,14 +15,13 @@ if TOCO_ENABLE_EMULATE:
 else:
     from libTocopatchDevice import HeartyPatch_Listener as _HeartyPatch_Listener
 
-from libTocopatchSignal import ProcessUC as ProcessUC
+from libTocopatchSignal import ProcessUC
 from libTocopatchSignal import isolateUC       # currently unused
 
 
 class TocoListener:
 
     def __init__(self, *args, **kwargs):
-        self.listener = _HeartyPatch_Listener(*args, **kwargs)
         self.processUC = ProcessUC(fs=128, **UC_DEFAULT_PARAMS)
         self.skew = 0
         self.min_samples=128*5
@@ -39,16 +38,14 @@ class TocoListener:
         else:
             self.update_callback = None
 
-
         if 'completion_callback' in kwargs:
             self.completion_callback = kwargs['completion_callback']
             kwargs['completion_callback'] = self.proxy_completion_callback
         else:
             self.completion_callback = None
 
-        self.proxy_listener = _HeartyPatch_Listener(*args, **kwargs)
-
-        print 'server _HeartyPatch_Listener returning from init'
+        self.listener = _HeartyPatch_Listener(*args, **kwargs)
+        print 'server TocoListener returning from init'
 
 
     def proxy_connection_callback(self, *args, **kwargs):
@@ -56,16 +53,16 @@ class TocoListener:
 
 
     def proxy_update_callback(self, *args, **kwargs):
-        self.update_callback(*args, **kwargs)
-        # ret = self.callback_common(is_update=True)
-        # self.update_callback(ret)
+        ret = self.callback_common()
+        self.update_callback(ret)
 
 
-    # audio_recording_finished(self, results):
-    def proxy_completion_callback(self, *args, **kwargs):
-        self.completion_callback(*args, **kwargs)
-        # ret = self.callback_common()
-        # self.completion_callback(ret)
+    def proxy_completion_callback(self, ignore, abort=False):
+        if abort:
+            self.completion_callback(None, abort=abort)
+        else:
+            ret = self.callback_common()
+            self.completion_callback(ret)
 
 
     def update_skew(self, skew):
@@ -73,59 +70,44 @@ class TocoListener:
 
 
     def go(self):
-        return self.proxy_listener.go()
+        return self.listener.go()
 
 
     def stop(self, isCancelled=False):
-        return self.proxy_listener.stop(isCancelled)
+        return self.listener.stop(isCancelled)
 
 
     def wait(self):
-        return self.proxy_listener.wait()
+        return self.listener.wait()
 
 
     def get_start_time(self):
-        return self.proxy_listener.get_start_time()
+        return self.listener.get_start_time()
 
 
     def get_sample_rate(self):
-        return self.proxy_listener.get_sample_rate()
+        return self.listener.get_sample_rate()
 
 
     def getData(self):
-        return self.proxy_listener.getData()
+        return self.listener.getData()
 
     def teardown(self):
         pass
 
 
-    def callback_common(self, is_update=False):
+    def callback_common(self):
         try:
             sigIn, ts, seqID = self.listener.getData()
             sigIn = np.array(sigIn)
-            print 'toco callbacl', len(sigIn), len(ts), len(seqID), 'sample rate:', self.listener.get_sample_rate()
+            print 'toco callback', len(sigIn), len(ts), len(seqID), 'sample rate:', self.listener.get_sample_rate()
             self.processUC.updateFS(self.listener.get_sample_rate())
 
             ts, sigD, sigRel, sigUC, sigAltUC = self.processUC.processData(sigIn, skew=self.skew)
             ret = {'posMin': ts/60.0, 'pos': ts,
                                'filtered': sigRel, 'raw':sigD, 'uc':sigUC, 'alt_uc':sigAltUC}
-            print ret
             return ret
         except Exception:
             print 'Exception -- callback_common'
             return None
-        return ret
 
-
-# class xxProcessUC:
-#     def __init__(self, *args, **kwargs):
-#
-#         self.proxy = ProcessUC(*args, **kwargs)
-#
-#         print 'server _ProcessUC returning from init'
-#
-#     def updateFS(self, *args, **kwargs):
-#         return self.proxy.updateFS(*args, **kwargs)
-#
-#     def processData(self, *args, **kwargs):
-#         return self.proxy.processData(*args, **kwargs)
