@@ -73,7 +73,8 @@ from libAudioDetect import audio_detect, select_preferred_io
 from paramsUltrasound import EXTRACTOR_ARGS
 
 from libTocopatchSignal import ProcessUC, isolateUC, UC_DEFAULT_PARAMS
-from libTocopatchDevice import HeartyPatch_Listener
+# from libTocopatchDevice import HeartyPatch_Listener
+from libTocopatchDevice import HeartyPatch_Emulator as HeartyPatch_Listener
 
 
 from libUC import findUC

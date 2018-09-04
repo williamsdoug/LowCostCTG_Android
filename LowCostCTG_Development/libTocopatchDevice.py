@@ -26,8 +26,13 @@ import struct
 import numpy as np
 import time
 
+from CONFIG import TOCO_ENABLE_EMULATE, TOCO_EMULATION_RECORDING, TOCO_EMULATION_DELAY
+
 
 def ping_tocopatch(host, port=4567, connection_timeout=30, read_timeout=60):
+    if TOCO_ENABLE_EMULATE:
+        return True
+
     try:
         soc = socket.create_connection((host, port), timeout=connection_timeout)
     except Exception:
@@ -514,11 +519,11 @@ class DummyParser:
 
 class HeartyPatch_Emulator(HeartyPatch_Listener):
 
-    def __init__(self, infile, delay=1, warmup_sec=3,
+    def __init__(self, infile=None, delay=1, warmup_sec=3,
                  max_packets=10000, max_seconds=-1, outfile=None,
                  connection_callback=None,
                  update_callback=None, update_interval=50,
-                 completion_callback=None):
+                 completion_callback=None, **kwargs):
         self.connection_callback = connection_callback
         self.update_callback = update_callback
         self.update_interval = update_interval
@@ -526,9 +531,10 @@ class HeartyPatch_Emulator(HeartyPatch_Listener):
         self.max_packets = max_packets
         self.max_seconds = max_seconds
         self.warmup_sec = warmup_sec
-        self.infile = infile
+
+        self.infile = TOCO_EMULATION_RECORDING
         self.outfile = outfile
-        self.delay = delay
+        self.delay = TOCO_EMULATION_DELAY
 
         self.tStart = None
         self.tEnd = None
@@ -549,7 +555,7 @@ class HeartyPatch_Emulator(HeartyPatch_Listener):
 
 
     def get_sample_rate(self):
-        self.sample_rate
+        return self.sample_rate
 
 
     def collect_data(self):
@@ -557,7 +563,7 @@ class HeartyPatch_Emulator(HeartyPatch_Listener):
         try:
             (self.in_seqID, self.in_ts, self.in_sig, self.meta) = parseTocopatchRecording(self.infile)
             self.parser.ecg_per_packet = self.meta['ecg_per_packet']
-            self.tStart = self.meta['epoch']
+            #self.tStart = self.meta['epoch']
 
             print 'finished loading data from', self.infile
             print len(self.in_sig), len(self.in_ts), len(self.in_seqID)
@@ -571,7 +577,7 @@ class HeartyPatch_Emulator(HeartyPatch_Listener):
 
         samples_per_packet = self.parser.ecg_per_packet
         currentPackets = 0
-
+        self.tStart = time.time()
         while self.enabled.is_set():
             if self.delay > 0:
                 time.sleep(self.delay)
@@ -588,7 +594,7 @@ class HeartyPatch_Emulator(HeartyPatch_Listener):
             # if self.tStart is None:
             #     self.tStart = self.parser.all_ts[0]
 
-            self.save_data(final=False)
+            #self.save_data(final=False)
 
             # stop when we run out of data
             if ptr >= len(self.in_sig):
@@ -611,16 +617,35 @@ class HeartyPatch_Emulator(HeartyPatch_Listener):
         self.finish()
 
     def finish(self, abort=False):
+        self.tEnd = time.time()
 
-        durationInSec = len(self.parser.all_ts)/self.sample_rate
-        self.tEnd = self.tStart + durationInSec
-        if not abort:
-            self.save_data(final=True)
+        # durationInSec = len(self.parser.all_ts)/self.sample_rate
+        # self.tEnd = self.tStart + durationInSec
+
+        # if not abort:
+        #     self.save_data(final=True)
         self.wasAborted = abort
         if self.completion_callback:
             self.completion_callback(self, abort=abort)
 
     # Note:  Incomplete emulation of stats
     def getStats(self):
-        return {'packet_count': 0}
+        duration = self.tEnd - self.tStart
+        #return {'packet_count': 0}
+
+        stats = {
+            'duration': duration,
+            'packet_count': 0,
+            # 'total_bytes': total_bytes,
+            # 'nSamples': nSamples,
+            # 'packet_rate': packet_rate,
+            'sample_rate': self.sample_rate,
+            # 'bytes_per_packet': bytes_per_packet,
+            # 'bad_packet_count': bad_packet_count,
+            # 'bytes_skipped': bytes_skipped,
+            'tStart': self.tStart,
+            #'samples_per_packet': samples_per_packet,
+        }
+
+        return stats
 
