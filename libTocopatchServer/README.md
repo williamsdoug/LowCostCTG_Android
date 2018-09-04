@@ -1,24 +1,29 @@
-# libAudioServer
+# TocopatchServer
 
 ### Exposed Endpoint (libAudio):
 
-- Exposes audio_recorder object from libAudio.py (also libAudioEmulate.py when in emulation mode)
+- Exposes TocoListener object from wrapTocopatchServer.py (combined libTocopatchDevice.py and libTocopatchSignal.py)
   - RPC:  
-    - audio_recorder() => 'audio_recorder__init'
-    - audio_recorder.stop() => 'audio_recorder__stop'
-    - audio_recorder.wait() => 'audio_recorder__wait'
-    - audio_recorder.get_start_time() => 'audio_recorder__get_start_time'
+    - TocoListener() => 'libTocopatch__init'
+    - TocoListener.go() => 'libTocopatch__go'
+    - TocoListener.stop() => 'libTocopatch__stop'
+    - TocoListener.wait() => 'libTocopatch__wait'
+    - TocoListener.get_start_time() => 'libTocopatch__get_start_time'
+    - TocoListener.get_sample_rate() => 'libTocopatch__ get_sample_rate'
+    - TocoListener.getData() => 'libTocopatch__getData'
+    - TocoListener.update_skew() => 'libTocopatch__update_skew'
+    - TocoListener.teardown() => 'libTocopatch__teardown'
+    
   - pub/sub used for callbacks:
+   - self.connection_callback => 'connection' message
    - self.update_callback => 'update' message
    - self.completion_callback = 'completion' message
-- Indirectly exposes combineExtractionResults from libUltrasound.py
-  - Currently exposed only as part of update and completion callbacks
 
 - Note: Some refactoring of original code in wrapLibAudioServer.py to avoid back-to-back calls during callback functions
 
 
 ### Operaton
-- cd libAudioServer
+- cd libTocopatchServer
 - python main.py
 
 
@@ -37,14 +42,13 @@
 - Realtime audio capture (using libAudio.py):
   - set USE_LIB_AUDIO_EMULATE = True
   - set ENABLE_EMULATE = False
-- Emulation (using libAudio.py or LibAudioEmulate.py):
+- Emulation (using HeartyPatch_Listener or HeartyPatch_Emulator):
   - Select library
-    - USE_LIB_AUDIO_EMULATE = True selects libAudioEmulate
-    - USE_LIB_AUDIO_EMULATE = False selects libAudio
-      - must also set ENABLE_EMULATE = True
+    - TOCO_ENABLE_EMULATE = True selects HeartyPatch_Emulator
+    - TOCO_ENABLE_EMULATE = False selects HeartyPatch_Listener
   - Playback speed
-     - EMULATION_DELAY controls wait time for each 1K (0.125 seconds) worth of data
-     - set EMULATION_DELAY = 1.0/8 for full speed recording
-     - set EMULATION_DELAY = 1.0/8/n for increased recording speed
-       - For example, setting n=4 will speed-up oplayback 4x
+     - EMULATION_SPEEDUP controls wait time between 1 seconbds worth of data
+     - set EMULATION_SPEEDUP = 1.0 for full speed recording
+     - set EMULATION_SPEEDUP = n for increased recording speed
+       - For example, setting n=4 will speed-up playback 4x
      

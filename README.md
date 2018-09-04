@@ -4,7 +4,7 @@ Porting of LowCostCTG / Combined Recorder to a client (UI) and a set of services
 
 ### Porting Evolution
 
-1. Restructure Scipy and Android dependent code into standalone services
+1. Restructure Scipy and Android dependent code into standalone services -- **DONE**
      1. Currently uses ZeroMQ for RPC
 1. Modify android-specific code (primarily android audio processing)
     1. Includes libAudiDetect code for discovery of bluetooth audio input and audio output devices
@@ -41,6 +41,13 @@ Porting of LowCostCTG / Combined Recorder to a client (UI) and a set of services
 - Exposes summarizeDecels and extractAllDecels from libDecel.py as RPC
 - libDecelServer/main.py includes ZeroMQ RPC management and gasket
   
+
+#### libTocopatchServer
+
+- Exposes TocoListener object from wrapTocopatch.py (HeartyPatch_Listener, HeartyPatch_Emulator when in emulation mode)
+  - pub/sub used for callbacks
+- Note: Some refactoring of original code in wrapTocopatch.py to avoid back-to-back calls during callback functions
+
 
 #### LowCostCTG_Development
 
