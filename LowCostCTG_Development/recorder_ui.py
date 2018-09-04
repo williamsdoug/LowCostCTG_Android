@@ -72,10 +72,17 @@ from libAudioDetect import audio_detect, select_preferred_io
 #from libUltrasound import combineExtractionResults
 from paramsUltrasound import EXTRACTOR_ARGS
 
-from libTocopatchSignal import ProcessUC, isolateUC, UC_DEFAULT_PARAMS
-# from libTocopatchDevice import HeartyPatch_Listener
-from libTocopatchDevice import HeartyPatch_Emulator as HeartyPatch_Listener
+from paramsUC import UC_DEFAULT_PARAMS
 
+if False:
+    from libTocopatchSignal import ProcessUC, isolateUC
+    # from libTocopatchDevice import HeartyPatch_Listener
+    from libTocopatchDevice import HeartyPatch_Emulator as HeartyPatch_Listener
+else:
+    from wrapTocopatchServer import TocoListener
+    #from wrapTocopatchServer import HeartyPatch_Listener
+    #from wrapTocopatchServer import ProcessUC, isolateUC
+    from libTocopatchSignal import ProcessUC, isolateUC
 
 from libUC import findUC
 
@@ -1185,7 +1192,8 @@ class PlotPopup(Popup):
 
         self.data['uc_source'] = 'tocopatch'
         recording_file = None if self.readonly else self.toco_file
-        self.toco_listener = HeartyPatch_Listener(host=self.host, max_packets=-1, max_seconds=-1,
+        self.toco_listener = TocoListener(host=self.host, max_packets=-1, max_seconds=-1,
+        #self.toco_listener = HeartyPatch_Listener(host=self.host, max_packets=-1, max_seconds=-1,
                                          outfile=recording_file, warmup_sec=0,
                                          connection_callback=self.toco_listener_connection_callback,
                                          update_callback=self.toco_listener_update_callback,
@@ -1200,44 +1208,47 @@ class PlotPopup(Popup):
         pass
 
 
-    def toco_listener_update_callback(self, listener, abort, min_samples=128*5):
+    def toco_listener_update_callback(self, *args):
         print 'called toco_listener_update_callback'
 
         if self.toco_start_time is None:
             self.toco_start_time = self.toco_listener.get_start_time()
+
         if self.toco_skew is None and self.audio_start_time is not None and self.toco_start_time is not None:
             self.toco_skew = self.toco_start_time - self.audio_start_time
+            #self.toco_listener.update_skew(self.toco_skew)
 
-        sigIn, ts, seqID = self.toco_listener.getData()
-
-        print 'update', len(sigIn), len(ts), len(seqID), 'sample rate:', self.toco_listener.sample_rate
-        if len(sigIn) < min_samples:
-            return
-
-        sigIn = np.array(sigIn)
-        self.processUC.updateFS(self.toco_listener.get_sample_rate())
-        skew = self.toco_skew if self.toco_skew is not None else 0
-        ts, sigD, sigRel, sigUC, sigAltUC = self.processUC.processData(sigIn, skew=skew)
-
-        self.data['uc'] = {'posMin': ts/60.0, 'pos': ts,
-                          'filtered': sigRel, 'raw':sigD, 'uc':sigUC, 'alt_uc':sigAltUC}
-
-        self.current_plot_state['uc_updated'] = True
-        Clock.schedule_once(lambda x: self.update_plot_display(), 0)
+        min_samples = 128 * 5
+        result = self.toco_listener_callback_common(self.toco_skew, min_samples=min_samples)
+        if result:
+            self.data['uc'] = result
+            self.current_plot_state['uc_updated'] = True
+            Clock.schedule_once(lambda x: self.update_plot_display(), 0)
 
 
-    def toco_listener_completion_callback(self, listener, abort):
-        sigIn, ts, seqID = self.toco_listener.getData()
-        print 'completion', len(sigIn), len(ts), len(seqID)
-        sigIn = np.array(sigIn)
-
-        self.processUC.updateFS(self.toco_listener.get_sample_rate())
-
-        skew = self.toco_skew if self.toco_skew is not None else 0
-        ts, sigD, sigRel, sigUC, sigAltUC = self.processUC.processData(sigIn, skew=skew)
-        self.data['uc'] = {'posMin': ts/60.0, 'pos': ts,
-                           'filtered': sigRel, 'raw':sigD, 'uc':sigUC, 'alt_uc':sigAltUC}
+    def toco_listener_completion_callback(self, *args):
+        print 'toco_listener_completion_callback'
+        result = self.toco_listener_callback_common(self.toco_skew, min_samples=None)
+        if result:
+            self.data['uc'] = result
         self.toco_listener = None
+
+
+    def toco_listener_callback_common(self, skew, min_samples=None):
+        sigIn, ts, seqID = self.toco_listener.getData()
+        if min_samples and len(sigIn) < min_samples:
+            return None
+        sigIn = np.array(sigIn)
+        print 'toco callbacl', len(sigIn), len(ts), len(seqID), 'sample rate:', self.toco_listener.get_sample_rate()
+        self.processUC.updateFS(self.toco_listener.get_sample_rate())
+
+        if skew is None:
+            skew = 0
+
+        ts, sigD, sigRel, sigUC, sigAltUC = self.processUC.processData(sigIn, skew=skew)
+        ret = {'posMin': ts/60.0, 'pos': ts,
+                           'filtered': sigRel, 'raw':sigD, 'uc':sigUC, 'alt_uc':sigAltUC}
+        return ret
 
 
     #
