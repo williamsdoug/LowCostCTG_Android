@@ -1,3 +1,9 @@
+# coding: utf-8
+
+#
+#  Copyright Douglas Williams, 2018
+#  All Rights Reserved
+#
 
 from CONFIG import USE_LIB_AUDIO_EMULATE
 

@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+#
+#  Copyright Douglas Williams, 2018
+#  All Rights Reserved
+#
+
 from libDecel import extractAllDecels, summarizeDecels
 from paramsDecel import FEATURE_EXTRACT_PARAMS
 from libUC import findUC

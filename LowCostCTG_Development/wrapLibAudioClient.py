@@ -1,3 +1,9 @@
+# coding: utf-8
+
+#
+#  Copyright Douglas Williams, 2018
+#  All Rights Reserved
+#
 
 from wrapClientCommon import client_common, get_client
 

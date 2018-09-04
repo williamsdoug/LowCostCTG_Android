@@ -1,3 +1,9 @@
+# coding: utf-8
+
+#
+#  Copyright Douglas Williams, 2018
+#  All Rights Reserved
+#
 
 from wrapLibAudioServer import audio_recorder as _audio_recorder
 from libUltrasound import combineExtractionResults
