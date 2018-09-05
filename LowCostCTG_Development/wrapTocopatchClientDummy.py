@@ -6,6 +6,8 @@
 #
 
 from wrapTocopatchServer import TocoListener as _TocoListener
+
+from wrapTocopatchServer import ping_tocopatch
 #
 # Non RPC Debug Versions
 #

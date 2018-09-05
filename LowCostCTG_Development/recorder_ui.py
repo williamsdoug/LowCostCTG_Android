@@ -66,9 +66,9 @@ else:
     from libUC import findUC
 
 if LIBTOCOPATCH_USE_REMOTE:
-    from wrapTocopatchClient import TocoListener
+    from wrapTocopatchClient import TocoListener, ping_tocopatch
 else:
-    from wrapTocopatchClientDummy import TocoListener
+    from wrapTocopatchClientDummy import TocoListener, ping_tocopatch
     #from wrapTocopatchServer import TocoListener
 
 

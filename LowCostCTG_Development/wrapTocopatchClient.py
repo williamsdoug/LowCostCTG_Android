@@ -140,9 +140,18 @@ class TocoListener:
         return client_common('libTocopatch__getData', args, kwargs, endpoint='libTocopatch')
 
 
+    def getData(self, *args, **kwargs):
+        return client_common('libTocopatch__getData', args, kwargs, endpoint='libTocopatch')
+
+
+
+
     def teardown(self, *args, **kwargs):
         global XMQ_SUB_POLLER_MAP, XMQ_SUB_POLLER_GENERATION
         print 'calling teardown'
         XMQ_SUB_POLLER_MAP = None
         XMQ_SUB_POLLER_GENERATION = None
 
+
+def ping_tocopatch(*args, **kwargs):
+    return client_common('__ping_tocopatch', args, kwargs, endpoint='libTocopatch')

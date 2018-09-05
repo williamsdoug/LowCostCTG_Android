@@ -5,7 +5,7 @@
 #  All Rights Reserved
 #
 
-from wrapTocopatchServer import TocoListener
+from wrapTocopatchServer import TocoListener, ping_tocopatch
 
 import zmq
 
@@ -63,6 +63,14 @@ class Server:
                 # terminate gracefully
                 self.socket.send_pyobj([True, 'byebye'])
                 return
+            elif fun_name == '__ping_tocopatch':
+                try:
+                    ret = ping_tocopatch(*args, **kwargs)
+                    self.socket.send_pyobj([True, ret])
+                except Exception, e:
+                    print 'TocoListener server -- ping_tocopatch returned exception {}'.format(e)
+                    self.socket.send_pyobj([False, e])
+
             elif not fun_name.startswith(PREFIX):
                 self.report_unknown(fun_name)
             elif fun_name.endswith('__init'):

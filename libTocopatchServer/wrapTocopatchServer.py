@@ -15,6 +15,8 @@ if TOCO_ENABLE_EMULATE:
 else:
     from libTocopatchDevice import HeartyPatch_Listener as _HeartyPatch_Listener
 
+from libTocopatchDevice import ping_tocopatch
+
 from libTocopatchSignal import ProcessUC
 from libTocopatchSignal import isolateUC       # currently unused
 

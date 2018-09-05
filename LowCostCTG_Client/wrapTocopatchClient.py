@@ -146,3 +146,5 @@ class TocoListener:
         XMQ_SUB_POLLER_MAP = None
         XMQ_SUB_POLLER_GENERATION = None
 
+def ping_tocopatch(*args, **kwargs):
+    return client_common('__ping_tocopatch', args, kwargs, endpoint='libTocopatch')

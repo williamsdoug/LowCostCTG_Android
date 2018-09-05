@@ -51,7 +51,7 @@ import gc
 
 from wrapLibAudioClient import audio_recorder, combineExtractionResults
 from wrapLibDecel import extractAllDecels, summarizeDecels
-from wrapTocopatchClient import TocoListener
+from wrapTocopatchClient import TocoListener, ping_tocopatch
 from wrapLibUC import findUC
 
 from libAudioDetect import audio_detect, select_preferred_io
