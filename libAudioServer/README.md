@@ -43,8 +43,8 @@
     - USE_LIB_AUDIO_EMULATE = False selects libAudio
       - must also set ENABLE_EMULATE = True
   - Playback speed
-     - EMULATION_DELAY controls wait time for each 1K (0.125 seconds) worth of data
-     - set EMULATION_DELAY = 1.0/8 for full speed recording
-     - set EMULATION_DELAY = 1.0/8/n for increased recording speed
-       - For example, setting n=4 will speed-up oplayback 4x
+     - EMULATION_SPEEDUP controls wait time between 1 seconbds worth of data
+     - set EMULATION_SPEEDUP = 1.0 for full speed recording
+     - set EMULATION_SPEEDUP = n for increased recording speed
+       - For example, setting n=4 will speed-up playback 4x
      

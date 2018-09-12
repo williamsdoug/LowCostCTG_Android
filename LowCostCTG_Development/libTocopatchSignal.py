@@ -19,19 +19,6 @@ import numpy as np
 import scipy
 from scipy import signal
 
-UC_DEFAULT_PARAMS = {
-    'fLower':.25,
-    'fUpper':0.8,
-    'orderBandpass':3,
-    'freqUC':1.0/72,
-    # 'freqUC2':1.0/108,
-    'freqUC2':1.0/36,
-    'orderUC':4,
-    'pctClipMax':95,
-    'clipMaxScale':2,
-    'pctClipMin':20,
-}
-
 
 def processUC(sigIn, fs, **kwargs):
 

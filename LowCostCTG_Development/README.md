@@ -12,5 +12,7 @@
 #### RPC/Local function 
 - LIBAUDIO_USE_REMOTE : Determines whether libAudio functions peformed locally or remote
   - if local, see libAudioServer documentation for CONFIG.py settings
-- LIBDECEL_USE_REMOTE : Determines whether libDecel functions peformed locally or remote
+- LIBDECEL_USE_REMOTE : Determines whether libDecel functions peformed locally or remote 
+- LIBTOCOPATCH_USE_REMOTE : Determines whether libAudio functions peformed locally or remote
+  - if local, see libTocopatchServer documentation for CONFIG.py settings
 

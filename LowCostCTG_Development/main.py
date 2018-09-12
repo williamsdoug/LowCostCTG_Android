@@ -43,10 +43,12 @@ import math
 from settingsjson import all_settings
 from persistence import RecordingsPersistenceManager, PatientPersistenceManager, get_db_path, \
     DB_NAME, REMOTE_DB_NAME, DEMO_DB_NAME
-from recorder_ui import PlotPopup
+
+from recorder_ui import PlotPopup, ping_tocopatch
 
 from libPing import ping
-from libTocopatchDevice import ping_tocopatch
+
+#from libTocopatchDevice import ping_tocopatch
 
 from paramsThresholdsHR import *
 

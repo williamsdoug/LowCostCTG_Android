@@ -11,7 +11,10 @@
 
 import numpy as np
 import scipy.signal
-from matplotlib import pyplot as plt
+try:
+    from matplotlib import pyplot as plt
+except Exception:
+    pass
 
 from libSignalProcessing import filterSignal, getCrossings
 

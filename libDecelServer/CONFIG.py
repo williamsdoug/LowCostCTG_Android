@@ -5,5 +5,5 @@
 #  All Rights Reserved
 #
 
-ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5555"
+ZMQ_BATCH_SERVER_ADDRESS_SPEC = "tcp://*:5555"
 
