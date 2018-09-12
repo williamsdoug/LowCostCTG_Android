@@ -1,6 +1,6 @@
 # TocopatchServer
 
-### Exposed Endpoint (libAudio):
+### Exposed Endpoint (libTocopatch):
 
 - Exposes TocoListener object from wrapTocopatchServer.py (combined libTocopatchDevice.py and libTocopatchSignal.py)
   - RPC:  
@@ -19,7 +19,7 @@
    - self.update_callback => 'update' message
    - self.completion_callback = 'completion' message
 
-- Note: Some refactoring of original code in wrapLibAudioServer.py to avoid back-to-back calls during callback functions
+- Note: Some refactoring of original code in wrapTocopatchServer.py to avoid back-to-back calls during callback functions
 
 
 ### Operaton
@@ -35,13 +35,10 @@
   - port for RPC
   - port for PUB (used for pub/sub operations as part of implementation of callbacks)
 
-#### Audio configuration:
+#### Tocopatch configuration:
 - Supports two modes of operation:
-  - Realtime audio capture
+  - Realtime tocopatch capture
   - Recording emulation using existing recording (sample.wav)
-- Realtime audio capture (using libAudio.py):
-  - set USE_LIB_AUDIO_EMULATE = True
-  - set ENABLE_EMULATE = False
 - Emulation (using HeartyPatch_Listener or HeartyPatch_Emulator):
   - Select library
     - TOCO_ENABLE_EMULATE = True selects HeartyPatch_Emulator

@@ -5,8 +5,8 @@
 #  All Rights Reserved
 #
 
-ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5558"
-ZMQ_PUB_ADDRESS_SPEC = "tcp://*:5559"
+ZMQ_TOCO_SERVER_ADDRESS_SPEC = "tcp://*:5558"
+ZMQ_TOCO_PUB_ADDRESS_SPEC = "tcp://*:5559"
 
 TOCO_ENABLE_EMULATE = True
 TOCO_EMULATION_RECORDING = 'toco_sample.csv'

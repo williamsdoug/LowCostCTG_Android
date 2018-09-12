@@ -6,8 +6,8 @@
 #
 
 
-ZMQ_SERVER_ADDRESS_SPEC = "tcp://*:5556"
-ZMQ_PUB_ADDRESS_SPEC = "tcp://*:5557"
+ZMQ_AUDIO_SERVER_ADDRESS_SPEC = "tcp://*:5556"
+ZMQ_AUDIO_PUB_ADDRESS_SPEC = "tcp://*:5557"
 
 USE_LIB_AUDIO_EMULATE = True       # select audio library
 
