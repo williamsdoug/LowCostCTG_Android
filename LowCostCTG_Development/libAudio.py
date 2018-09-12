@@ -10,7 +10,10 @@ from CONFIG import ENABLE_EMULATE, EMULATION_RECORDING, EMULATION_DELAY
 
 
 import threading
-import pyaudio
+try:
+    import pyaudio
+except Exception, e:
+    print e
 import wave
 import numpy as np
 import scipy
