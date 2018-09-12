@@ -27,6 +27,7 @@ android {
                 install "pyzmq==17.0.0"
                 install "zmq==0.0.0"
                 install "six"
+                install "matplotlib"
             }
         }
         ndk {
