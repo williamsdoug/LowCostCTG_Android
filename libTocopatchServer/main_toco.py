@@ -5,17 +5,14 @@
 #  All Rights Reserved
 #
 
-from TocoServer import TocoServer
+from TocoServer import TocoServer, getTocoServer
 
-from CONFIG import ZMQ_TOCO_SERVER_ADDRESS_SPEC, ZMQ_TOCO_PUB_ADDRESS_SPEC
-
-PREFIX = 'libTocopatch__'
-XMQ_SUB_POLLER_GENERATION = None
-#
-# Server Code
-#
-
-
-# If called at top level, start server
+# start server
 if __name__ == '__main__':
-    TocoServer(ZMQ_TOCO_SERVER_ADDRESS_SPEC, ZMQ_TOCO_PUB_ADDRESS_SPEC).serve()
+    #svr = TocoServer(ZMQ_TOCO_SERVER_ADDRESS_SPEC, ZMQ_TOCO_PUB_ADDRESS_SPEC)
+    svr = getTocoServer()
+    if True:
+        svr.serve()
+    else:
+        svr.start()
+        svr.wait()

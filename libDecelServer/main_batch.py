@@ -5,10 +5,14 @@
 #  All Rights Reserved
 #
 
-from BatchServer import batchServer
+from BatchServer import BatchServer, getBatchServer
 
-from CONFIG import ZMQ_BATCH_SERVER_ADDRESS_SPEC
-
-# If called at top level, start server
+# start server
 if __name__ == '__main__':
-    batchServer(ZMQ_BATCH_SERVER_ADDRESS_SPEC)
+    #svr = BatchServer(ZMQ_BATCH_SERVER_ADDRESS_SPEC)
+    svr = getBatchServer()
+    if True:
+        svr.serve()
+    else:
+        svr.start()
+        svr.wait()
