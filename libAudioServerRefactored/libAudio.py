@@ -30,7 +30,7 @@ class audio_recorder:
                  chunk_size=1000, frame_rate=8000, enable_playback=True,
                  update_callback=None,
                  completion_callback=None,
-                 audio_in_chan=None, audio_out_chan= None):
+                 audio_in_chan=None, audio_out_chan= None, **kwargs):
 
         if ENABLE_EMULATE:
             infile = EMULATION_RECORDING

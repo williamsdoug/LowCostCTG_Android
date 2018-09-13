@@ -50,27 +50,25 @@ class AudioSupport:
 
 
     def process_segment(self, segment):
-        # prime the pump
-        while self.enabled.is_set() and len(segment) > 0:
-            # Process data through Hilbert Transformer
-            prior_count = self.extractor.get_results_count()
-            sigD = scipy.signal.decimate(segment, 8, zero_phase=True)  # Downsample to 1K samples/second
-            self.hd.addData(sigD)                                           # compute envelope using hilbert
-            self.extractor.extract_incremental()                            # now compute instantaneous HR
-            delta_hd = self.extractor.get_results_count() - prior_count
+        # Process data through Hilbert Transformer
+        prior_count = self.extractor.get_results_count()
+        sigD = scipy.signal.decimate(segment, 8, zero_phase=True)  # Downsample to 1K samples/second
+        self.hd.addData(sigD)                                           # compute envelope using hilbert
+        self.extractor.extract_incremental()                            # now compute instantaneous HR
+        delta_hd = self.extractor.get_results_count() - prior_count
 
-            # Process data through ZC transformer
-            prior_count = self.zc_extractor.get_results_count()
-            self.zc.addData(segment)                                         # compute pitch
-            self.zc_extractor.extract_incremental()                          # now compute instantaneous HR
-            delta_zc =  self.zc_extractor.get_results_count() - prior_count
+        # Process data through ZC transformer
+        prior_count = self.zc_extractor.get_results_count()
+        self.zc.addData(segment)                                         # compute pitch
+        self.zc_extractor.extract_incremental()                          # now compute instantaneous HR
+        delta_zc =  self.zc_extractor.get_results_count() - prior_count
 
-            # perform callback if new data
-            if self.update_callback and delta_hd > 0 or delta_zc > 0:
-                if self.extractor.get_results_count() == self.zc_extractor.get_results_count():
-                    results = {'envelope': self.extractor.get_results(),
-                               'pitch': self.zc_extractor.get_results()}
-                    self.update_callback(results)
+        # perform callback if new data
+        if self.update_callback and delta_hd > 0 or delta_zc > 0:
+            if self.extractor.get_results_count() == self.zc_extractor.get_results_count():
+                results = {'envelope': self.extractor.get_results(),
+                           'pitch': self.zc_extractor.get_results()}
+                self.update_callback(results)
 
 
     def finish_processing(self):
