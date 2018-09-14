@@ -4,7 +4,6 @@ import cPickle as pickle
 class jmqAgain(Exception):
     pass
 
-
 ZMQ_NOBLOCK = 1
 
 
@@ -17,7 +16,6 @@ def recv_pyobj(socket, blocking=True):
         msg = socket.recvStr()
 
     if isinstance(msg, unicode):
-        # msg.encode('utf-8')
         msg = str(msg)
     message = pickle.loads(msg)
     return message

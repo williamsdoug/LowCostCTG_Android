@@ -1,6 +1,5 @@
 # Porting Zeromq Code To Use JeroMQ
 
-
 ### Interoperability Issues
 
 - Python string/uncode issues preclude direct use of xmq socket.recv_pyobj() and xmq socket.send_pyobj()
@@ -13,7 +12,7 @@
   - Coude located in `./java` directory in this repo
   - Build envirinment: `/Users/doug/IdeaProjects/JavaTest`
 
-### Porting compatability library
+### Porting to use ZeroMQ with compatability library
 
 - Include import
   - `from zeromq_compat import recv_pyobj, send_pyobj`
@@ -24,8 +23,9 @@
 - Replace `socket.send_pyobj()`
   - `socket.send_pyobj(message)` becomes `send_pyobj(socket, message)`
   
-  
-### Porting Details
+### Porting to use JeroMQ with compatability library
+
+#### Code changes
 
 - Remove `import zmq`
 - Add imports
@@ -52,7 +52,7 @@ ZContext = autoclass('org.zeromq.ZContext')
 - Replace `socket.subscribe()` with `Subscriber.subscribe(socket)`
   - Requires: `Subscriber = autoclass('com.ddw_gd.jeromqfixer.JeromqFixer')`
 
-### Configuring Java
+#### Configuring Java
 - Define Java related environment variables either externally or internally:
   - Externally
   ```buildoutcfg
@@ -64,7 +64,7 @@ $ export CLASSPATH="/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-
   ```buildoutcfg
 import os
 os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home'
-os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar"
+os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-0.4.3.jar"
   ```
   - Note:   
     - `JAVA_HOME` defines path to java sdk on your system 
@@ -73,6 +73,6 @@ os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/noteb
 
 - Subscribe operation requires additional library (jar) in `CLASSPATH`
 ```buildoutcfg
-os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar" \
+os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-0.4.3.jar" \
                           + ":" + "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromqfixer.jar"
 ```

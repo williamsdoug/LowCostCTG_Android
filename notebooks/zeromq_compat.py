@@ -12,7 +12,6 @@ def recv_pyobj(socket, blocking=True):
         msg = socket.recv_string()
 
     if isinstance(msg, unicode):
-        # msg.encode('utf-8')
         msg = str(msg)
     message = pickle.loads(msg)
     return message

@@ -12,7 +12,6 @@ Includes both ZeroMQ and Java-native JeroMQ libraries
   - Python: zmq_pub.py, zmq_sub.py
   - Java:   jzmq_pub.py, jzmq_sub.py
   
-### Known Issues
 
 ### Porting and Interoperability between ZeroMQ and JeroMQ
 
@@ -26,10 +25,8 @@ Includes both ZeroMQ and Java-native JeroMQ libraries
     - Work-around:  Use JeromqFixer (jeromqfixer.py) to perform subscription using java code
     - Coude located in `./java` directory in this repo
     - Build envirinment: `/Users/doug/IdeaProjects/JavaTest`
-    
-### Porting and interoperability changes:
 
-#### Porting to use ZeroMQ with compatability library
+### Porting to use ZeroMQ with compatability library
 
 - Include import
   - `from zeromq_compat import recv_pyobj, send_pyobj`
@@ -41,9 +38,9 @@ Includes both ZeroMQ and Java-native JeroMQ libraries
   - `socket.send_pyobj(message)` becomes `send_pyobj(socket, message)`
   
   
-#### Porting to use JeroMQ
+### Porting to use JeroMQ with compatability library
 
-##### Code changes
+#### Code changes
 - Remove `import zmq`
 - Add imports
 ```buildoutcfg
@@ -69,7 +66,7 @@ ZContext = autoclass('org.zeromq.ZContext')
 - Replace `socket.subscribe()` with `Subscriber.subscribe(socket)`
   - Requires: `Subscriber = autoclass('com.ddw_gd.jeromqfixer.JeromqFixer')`
 
-##### Configuring Java
+#### Configuring Java
 - Define Java related environment variables either externally or internally:
   - Externally
   ```buildoutcfg
@@ -81,7 +78,7 @@ $ export CLASSPATH="/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-
   ```buildoutcfg
 import os
 os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home'
-os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar"
+os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-0.4.3.jar"
   ```
   - Note:   
     - `JAVA_HOME` defines path to java sdk on your system 
@@ -90,6 +87,6 @@ os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/noteb
 
 - Subscribe operation requires additional library (jar) in `CLASSPATH`
 ```buildoutcfg
-os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar" \
+os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-0.4.3.jar" \
                           + ":" + "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromqfixer.jar"
 ```
