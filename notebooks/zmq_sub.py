@@ -8,34 +8,21 @@
 
 import sys
 import zmq
+from zeromq_compat import recv_pyobj, send_pyobj
 
 #  Socket to talk to server
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
-
-print "Collecting updates from weather server…"
-socket.connect("tcp://localhost:5556")
+socket.connect("tcp://localhost:8888")
+socket.setsockopt(zmq.SUBSCRIBE, b"")
 
 # Subscribe to zipcode, default is NYC, 10001
 zip_filter = sys.argv[1] if len(sys.argv) > 1 else "10001"
 
-# Python 2 - ascii bytes to unicode str
-# if isinstance(zip_filter, bytes):
-#     zip_filter = zip_filter.decode('ascii')
-# socket.setsockopt_string(zmq.SUBSCRIBE, zip_filter)
-
-#socket.setsockopt_string(zmq.SUBSCRIBE, ''.decode('ascii'))
-#socket.setsockopt(zmq.SUBSCRIBE, bytes())
-socket.setsockopt(zmq.SUBSCRIBE, b"")
-
 # Process 5 updates
 total_temp = 0
 for update_nbr in range(5):
-    # string = socket.recv_string()
-    # print string
-    # zipcode, temperature, relhumidity = string.split()
-
-    zipcode, temperature, relhumidity = socket.recv_pyobj()
+    zipcode, temperature, relhumidity = recv_pyobj(socket)
     print zipcode, temperature, relhumidity
     total_temp += int(temperature)
 

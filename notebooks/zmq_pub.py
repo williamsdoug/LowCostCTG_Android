@@ -9,24 +9,15 @@
 import zmq
 import time
 from random import randrange
+from zeromq_compat import recv_pyobj, send_pyobj
 
 context = zmq.Context()
 socket = context.socket(zmq.PUB)
-socket.bind("tcp://*:5556")
-
-# while True:
-#     zipcode = randrange(1, 100000)
-#     temperature = randrange(-80, 135)
-#     relhumidity = randrange(10, 60)
-#
-#     socket.send_string("%i %i %i" % (zipcode, temperature, relhumidity))
+socket.bind("tcp://*:8888")
 
 for zipcode in range(100):
-    #zipcode = randrange(1, 100000)
+    print 'zipcode:', zipcode
     temperature = randrange(-80, 135)
     relhumidity = randrange(10, 60)
-    print 'zipcode:', zipcode
-
-    #socket.send_string("%i %i %i" % (zipcode, temperature, relhumidity))
-    socket.send_pyobj((zipcode, temperature, relhumidity))
+    send_pyobj(socket, (zipcode, temperature, relhumidity))
     time.sleep(2)
