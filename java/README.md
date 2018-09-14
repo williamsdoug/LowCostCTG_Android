@@ -1,35 +1,19 @@
-# Simple ZeroMQ Messaging Examples
+# Porting Zeromq Code To Use JeroMQ
 
-Includes both ZeroMQ and Java-native JeroMQ libraries
 
-### Examples
+### Interoperability Issues
 
-- Request/Reply
-  - Python: zmq_client.py, zmq_server.py
-  - Java:   jzmq_client.py, jzmq_server.py
-
-- Pub/Sub
-  - Python: zmq_pub.py, zmq_sub.py
-  - Java:   jzmq_pub.py, jzmq_sub.py
-  
-### Known Issues
-
-### Porting and Interoperability between ZeroMQ and JeroMQ
-
-- Issues:
-  - Python string/uncode issues preclude direct use of xmq socket.recv_pyobj() and xmq socket.send_pyobj()
-    - Causes pickle deserialization to fail when unicode received on zeromq side from jeromq source
-    - Solution:  zeromq_compat.py / jeromq_compat.py to implement alternative recv_pyobj() and send_pyobj() with necessary unicode clean-up.
+- Python string/uncode issues preclude direct use of xmq socket.recv_pyobj() and xmq socket.send_pyobj()
+  - Causes pickle deserialization to fail when unicode received on zeromq side from jeromq source
+  - Solution:  zeromq_compat.py / jeromq_compat.py to implement alternative recv_pyobj() and send_pyobj() with necessary unicode clean-up.
  
-  - Unable to perform socket.subscribe([]) fromPython using pyjnius
-    - Zero-byte array not properly passed to jeromq via pyjnius
-    - Work-around:  Use JeromqFixer (jeromqfixer.py) to perform subscription using java code
-    - Coude located in `./java` directory in this repo
-    - Build envirinment: `/Users/doug/IdeaProjects/JavaTest`
-    
-### Porting and interoperability changes:
+- Unable to perform socket.subscribe([]) fromPython using pyjnius
+  - Zero-byte array not properly passed to jeromq via pyjnius
+  - Work-around:  Use JeromqFixer (jeromqfixer.py) to perform subscription using java code
+  - Coude located in `./java` directory in this repo
+  - Build envirinment: `/Users/doug/IdeaProjects/JavaTest`
 
-#### Porting to use ZeroMQ with compatability library
+### Porting compatability library
 
 - Include import
   - `from zeromq_compat import recv_pyobj, send_pyobj`
@@ -41,9 +25,8 @@ Includes both ZeroMQ and Java-native JeroMQ libraries
   - `socket.send_pyobj(message)` becomes `send_pyobj(socket, message)`
   
   
-#### Porting to use JeroMQ
+### Porting Details
 
-##### Code changes
 - Remove `import zmq`
 - Add imports
 ```buildoutcfg
@@ -69,7 +52,7 @@ ZContext = autoclass('org.zeromq.ZContext')
 - Replace `socket.subscribe()` with `Subscriber.subscribe(socket)`
   - Requires: `Subscriber = autoclass('com.ddw_gd.jeromqfixer.JeromqFixer')`
 
-##### Configuring Java
+### Configuring Java
 - Define Java related environment variables either externally or internally:
   - Externally
   ```buildoutcfg

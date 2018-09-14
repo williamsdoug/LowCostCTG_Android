@@ -21,7 +21,7 @@ from jeromq_compat import recv_pyobj, send_pyobj, jmqAgain
 # export CLASSPATH="/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar"
 
 os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home'
-os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar"
+os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-0.4.3.jar"
 
 from jnius import autoclass
 zmq = autoclass('org/zeromq/ZMQ')
