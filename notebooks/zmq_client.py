@@ -20,9 +20,9 @@ context = zmq.Context()
 #  Socket to talk to server
 print("Connecting to hello world server…")
 socket = context.socket(zmq.REQ)
-#socket.connect("tcp://localhost:5555")
+socket.connect("tcp://localhost:5555")
 #socket.connect("tcp://192.168.86.181:5555")
-socket.connect("tcp://127.0.0.1:5678")
+#socket.connect("tcp://127.0.0.1:5678")
 print 'Finished socket connect'
 
 data = np.arange(5)
