@@ -6,10 +6,14 @@
 #   Expects b"Hello" from client, replies with b"World"
 #
 
+ADDRESS_SPEC = "tcp://*:5555"
+NONBLOCK_DELAY = 0.1
+PRINT_INTERVAL = 10
+
 import sys
 import time
 import os
-import cPickle as pickle
+from jeromq_compat import recv_pyobj, send_pyobj, jmqAgain
 
 # export JAVA_HOME=`/usr/libexec/java_home`
 # export CLASSPATH="/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar"
@@ -23,28 +27,21 @@ ZContext = autoclass('org.zeromq.ZContext')
 
 context = ZContext()
 socket = context.createSocket(ZMQ.REP)
-socket.bind("tcp://*:5555")
-
-NONBLOCK_DELAY = 0.1
-PRINT_INTERVAL = 10
+socket.bind(ADDRESS_SPEC)
 
 wait_count = 1
-
 while True:
     #  Wait for next request from client
     try:
-        msg = socket.recvStr(ZMQ.NOBLOCK)
-        if msg is None:
-            wait_count += 1
-            if wait_count % PRINT_INTERVAL == 0:
-                print wait_count,
-                sys.stdout.flush()
-            time.sleep(NONBLOCK_DELAY)
-            continue
-
-        message = pickle.loads(msg)
+        message = recv_pyobj(socket, blocking=False)
         wait_count = 1
-
+    except jmqAgain:      #zmq.error.Again:
+        wait_count += 1
+        if wait_count % PRINT_INTERVAL == 0:
+            print wait_count,
+            sys.stdout.flush()
+        time.sleep(NONBLOCK_DELAY)
+        continue
     except KeyboardInterrupt:
         print("W: interrupt received, stopping…")
         break
@@ -53,13 +50,11 @@ while True:
     print 'data', type(message['number']), type(message['number'][0]), message['number']
     count = message['count']
 
-    #  Do some 'work'
-    time.sleep(1)
+    time.sleep(1)    #  Do some 'work'
 
     #  Send reply back to client
     messageR = {'msg':"World", 'count':count}
-    msg = pickle.dumps(messageR)
-    socket.send(msg)
+    send_pyobj(socket, messageR)
 
 # clean up
 socket.close()

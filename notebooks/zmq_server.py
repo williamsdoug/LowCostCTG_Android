@@ -6,16 +6,17 @@
 #   Expects b"Hello" from client, replies with b"World"
 #
 
+ADDRESS_SPEC = "tcp://*:5555"
+NONBLOCK_DELAY = 0.1
+PRINT_INTERVAL = 10
+
 import sys
 import time
 import zmq
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
-socket.bind("tcp://*:5555")
-
-NONBLOCK_DELAY = 0.1
-PRINT_INTERVAL = 10
+socket.bind(ADDRESS_SPEC)
 
 wait_count = 1
 
@@ -31,18 +32,15 @@ while True:
             sys.stdout.flush()
         time.sleep(NONBLOCK_DELAY)
         continue
-
     except KeyboardInterrupt:
         print("W: interrupt received, stopping…")
         break
-
 
     print "Received request: {} {}".format(message['count'],  message['msg'])
     print 'data', type(message['number']), type(message['number'][0]), message['number']
     count = message['count']
 
-    #  Do some 'work'
-    time.sleep(1)
+    time.sleep(1)    #  Do some 'work'
 
     #  Send reply back to client
     messageR = {'msg':"World", 'count':count}

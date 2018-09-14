@@ -15,7 +15,7 @@ ADDRESS_SPEC = "tcp://localhost:5555"
 
 import numpy as np
 import os
-import cPickle as pickle
+from jeromq_compat import recv_pyobj, send_pyobj, jmqAgain
 
 # export JAVA_HOME=`/usr/libexec/java_home`
 # export CLASSPATH="/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar"
@@ -24,30 +24,25 @@ os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Co
 os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/notebooks/jeromq-0.4.3.jar"
 
 from jnius import autoclass
-ZMQ = autoclass('org/zeromq/ZMQ')
+zmq = autoclass('org/zeromq/ZMQ')
 ZContext = autoclass('org.zeromq.ZContext')
 
-context = ZContext()
-
 #  Socket to talk to server
-print("Connecting to hello world server…")
-socket = context.createSocket(ZMQ.REQ)
+context = ZContext()
+socket = context.createSocket(zmq.REQ)
 socket.connect(ADDRESS_SPEC)
-print 'Finished socket connect'
-
-data = np.arange(5)
+print("Connected to hello world server…")
 
 #  Do 10 requests, waiting each time for a response
+data = np.arange(5)
 for request in range(10):
     print "Sending request {} …".format(request)
     message = {'msg':"Hello", 'count':request, 'number':data}
-    msg = pickle.dumps(message)
-    socket.send(msg)
+    send_pyobj(socket, message)
 
     #  Get the reply.
     try:
-        msg = socket.recvStr()
-        messageR = pickle.loads(msg)
+        messageR = recv_pyobj(socket)
     except KeyboardInterrupt:
         print("W: interrupt received, stopping…")
         break
