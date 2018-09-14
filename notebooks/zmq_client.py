@@ -14,9 +14,8 @@ ADDRESS_SPEC = "tcp://localhost:5555"
 #ADDRESS_SPEC = "tcp://127.0.0.1:5678"
 
 import zmq
-import time
-import sys
 import numpy as np
+from zeromq_compat import recv_pyobj, send_pyobj
 
 #  Socket to talk to server
 context = zmq.Context()
@@ -29,11 +28,13 @@ data = np.arange(5)
 for request in range(10):
     print "Sending request {} …".format(request)
     message = {'msg':"Hello", 'count':request, 'number':data}
-    socket.send_pyobj(message)
+    #socket.send_pyobj(message)
+    send_pyobj(socket, message)
 
     #  Get the reply.
     try:
-        messageR = socket.recv_pyobj()
+        #messageR = socket.recv_pyobj()
+        messageR = recv_pyobj(socket)
     except KeyboardInterrupt:
         print("W: interrupt received, stopping…")
         break

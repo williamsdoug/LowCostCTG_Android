@@ -13,6 +13,7 @@ PRINT_INTERVAL = 10
 import sys
 import time
 import zmq
+from zeromq_compat import recv_pyobj, send_pyobj
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
@@ -23,7 +24,8 @@ wait_count = 1
 while True:
     #  Wait for next request from client
     try:
-        message = socket.recv_pyobj(flags=zmq.NOBLOCK)
+        #message = socket.recv_pyobj(flags=zmq.NOBLOCK)
+        message = recv_pyobj(socket, blocking=False)
         wait_count = 1
     except zmq.Again: #zmq.error.Again:
         wait_count += 1
@@ -44,7 +46,8 @@ while True:
 
     #  Send reply back to client
     messageR = {'msg':"World", 'count':count}
-    socket.send_pyobj(messageR)
+    #socket.send_pyobj(messageR)
+    send_pyobj(socket, messageR)
 
 
 # clean up
