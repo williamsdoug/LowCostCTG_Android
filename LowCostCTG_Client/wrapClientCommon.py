@@ -6,9 +6,31 @@
 #
 
 
-import zmq
-
 from CONFIG import ZMQ_CLIENT_ADDRESS_SPEC
+
+from ZMQ_Again_Exception import ZMQ_Again
+
+try:
+    from CONFIG import USE_JEROMQ
+except Exception:
+    USE_JEROMQ = False
+
+
+if USE_JEROMQ:
+    try:
+        from CONFIG import DEFINE_JAVA_PATHS
+    except Exception:
+        DEFINE_JAVA_PATHS = False
+
+    if DEFINE_JAVA_PATHS:    # Define paths prior to invocation of pyjnius
+        import os
+        from CONFIG import JAVA_HOME, CLASSPATH
+        os.environ['JAVA_HOME'] = JAVA_HOME
+        os.environ['CLASSPATH'] = CLASSPATH
+
+    from jeromq_compat import ZeroMQ
+else:
+    from zeromq_compat import ZeroMQ
 
 
 ZMQ_CLIENT = {}
@@ -24,28 +46,25 @@ def get_client(endpoint):
 
         assert endpoint in ZMQ_CLIENT_ADDRESS_SPEC
         entry = ZMQ_CLIENT_ADDRESS_SPEC[endpoint]
-        context = zmq.Context()
-        if entry['type'] == 'req':
-            socket = context.socket(zmq.REQ)
-        elif entry['type'] == 'sub':
-            socket = context.socket(zmq.SUB)
 
-        socket.connect(entry['addr'])
-        if entry['type'] == 'sub':
-            socket.setsockopt(zmq.SUBSCRIBE, b"")
+        modes = {'req':ZeroMQ.REQ, 'rep':ZeroMQ.REP, 'pub':ZeroMQ.PUB, 'sub':ZeroMQ.SUB}
+        assert entry['type'] in modes
 
-        ZMQ_CLIENT[endpoint] = {'context':context, 'socket':socket}
+        print 'Creating socket', endpoint,entry['addr'], modes[entry['type']]
+
+        socket = ZeroMQ(entry['addr'], modes[entry['type']])
+        print 'Socket Created'
+        ZMQ_CLIENT[endpoint] = socket
     else:
-        context = ZMQ_CLIENT[endpoint]['context']
-        socket = ZMQ_CLIENT[endpoint]['socket']
+        socket = ZMQ_CLIENT[endpoint]
 
-    return context, socket
+    return socket
 
 
 def client_common(fun_name, args, vargs, endpoint='libDecel'):
-    context, socket = get_client(endpoint)
+    socket = get_client(endpoint)
     socket.send_pyobj([fun_name, args, vargs])
-    print 'client_common -- send function request'
+    print 'client_common -- send function request', fun_name, endpoint
     success, ret = socket.recv_pyobj()
     print 'client_common -- received response'
 

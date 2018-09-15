@@ -18,7 +18,7 @@ XMQ_SUB_POLLER_GENERATION = None
 
 def message_poller(*args, **kwards):
     global XMQ_SUB_POLLER_MAP, XMQ_SUB_POLLER_GENERATION
-    context, socket = get_client('libTocopatchCallbacks')
+    socket = get_client('libTocopatchCallbacks')
     while True:
         msg = socket.recv_pyobj()
         tag = msg[0]

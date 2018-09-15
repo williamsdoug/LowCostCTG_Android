@@ -8,7 +8,7 @@
 #
 # ZMQ Configuration
 #
-USE_LOCALHOST = False
+USE_LOCALHOST = True
 
 ANDROID_IP = "192.168.86.181"
 
@@ -29,4 +29,15 @@ else:
         'libTocopatch':         {'addr':"tcp://" + ANDROID_IP + ":5558", 'type':'req'},
         'libTocopatchCallbacks':{'addr':"tcp://" + ANDROID_IP + ":5559",'type':'sub'},
     }
+
+# Below parameters relate to use JeroMQ native java library
+
+USE_JEROMQ = False          # Delectes between ZeroMQ and JeroMQ
+DEFINE_JAVA_PATHS = True    # Define paths prior to invocation of pyjnius
+
+JAVA_HOME = '/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home'
+CLASSPATH = "/Users/doug/Documents/GitHub/LowCostCTG_Android/messaging/jeromq-0.4.3.jar" \
+            + ":" + "/Users/doug/Documents/GitHub/LowCostCTG_Android/messaging/jeromqfixer.jar"
+
+
 

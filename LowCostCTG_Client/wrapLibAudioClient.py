@@ -18,7 +18,8 @@ XMQ_SUB_POLLER_GENERATION = None
 
 def message_poller(*args, **kwards):
     global XMQ_SUB_POLLER_MAP, XMQ_SUB_POLLER_GENERATION
-    context, socket = get_client('libAudioCallbacks')
+    socket = get_client('libAudioCallbacks')
+
     while True:
         msg = socket.recv_pyobj()
         tag = msg[0]
