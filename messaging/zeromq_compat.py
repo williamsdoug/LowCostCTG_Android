@@ -1,5 +1,3 @@
-import cPickle as pickle
-#import pickle
 
 import zmq
 from ZMQ_Again_Exception import ZMQ_Again
@@ -22,7 +20,7 @@ class ZeroMQ:
         elif mode == self.PUB:
             self.socket.bind(address)
         elif mode == self.SUB:
-            self.socket.connect("tcp://localhost:8888")
+            self.socket.connect(address)
             self.socket.setsockopt(zmq.SUBSCRIBE, b"")
 
 
@@ -34,18 +32,13 @@ class ZeroMQ:
     def recv_pyobj(self, blocking=True):
         try:
             if not blocking:
-                msg = self.socket.recv_string(flags=zmq.NOBLOCK)
+                message = self.socket.recv_pyobj(flags=zmq.NOBLOCK)
             else:
-                msg = self.socket.recv_string()
+                message = self.socket.recv_pyobj()
         except zmq.Again, e:
             raise ZMQ_Again(e)
-
-        if isinstance(msg, unicode):
-            msg = str(msg)
-        message = pickle.loads(msg)
         return message
 
 
     def send_pyobj(self, message):
-        msg = pickle.dumps(message)
-        self.socket.send_string(msg)
+        self.socket.send_pyobj(message)

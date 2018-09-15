@@ -6,7 +6,7 @@
 #   Expects b"Hello" from client, replies with b"World"
 #
 
-ADDRESS_SPEC = "tcp://*:5555"
+ADDRESS_SPEC = "tcp://*:6666"
 
 from set_java_environment import set_java_home_and_classpath
 # must be executed before import from jeromq_compat

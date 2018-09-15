@@ -6,7 +6,7 @@
 #   Sends "Hello" to server, expects "World" back
 #
 
-ADDRESS_SPEC = "tcp://*:5555"
+ADDRESS_SPEC = "tcp://*:6666"
 
 from common import server
 from zeromq_compat import ZeroMQ

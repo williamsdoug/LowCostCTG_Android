@@ -26,7 +26,7 @@ class ZeroMQ:
         elif mode == self.PUB:
             self.socket.bind(address)
         elif mode == self.SUB:
-            self.socket.connect("tcp://localhost:8888")
+            self.socket.connect(address)
             Subscriber.subscribe(self.socket)
 
 
@@ -37,14 +37,13 @@ class ZeroMQ:
 
     def recv_pyobj(self, blocking=True):
         if not blocking:
-            msg = self.socket.recvStr(zmq.NOBLOCK)
+            msg = self.socket.recv(zmq.NOBLOCK)
             if msg is None or len(msg) == 0:
                 raise ZMQ_Again
         else:
-            msg = self.socket.recvStr()
+            msg = self.socket.recv()
 
-        if isinstance(msg, unicode):
-            msg = str(msg)
+        msg = "".join(map(chr, msg))
         message = pickle.loads(msg)
         return message
 
