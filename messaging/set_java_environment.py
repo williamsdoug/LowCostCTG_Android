@@ -7,5 +7,5 @@ def set_java_home_and_classpath():
 
     # os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-0.4.3.jar"
 
-    os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromq-0.4.3.jar" \
-                              + ":" + "/Users/doug/Documents/GitHub/LowCostCTG_Android/java/jeromqfixer.jar"
+    os.environ['CLASSPATH'] = "/Users/doug/Documents/GitHub/LowCostCTG_Android/messaging/jeromq-0.4.3.jar" \
+                              + ":" + "/Users/doug/Documents/GitHub/LowCostCTG_Android/messaging/jeromqfixer.jar"

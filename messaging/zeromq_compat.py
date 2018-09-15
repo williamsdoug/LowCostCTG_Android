@@ -2,7 +2,7 @@ import cPickle as pickle
 #import pickle
 
 import zmq
-from zeromq_exception import ZMQ_Again
+from ZMQ_Again_Exception import ZMQ_Again
 
 
 class ZeroMQ:
@@ -37,7 +37,7 @@ class ZeroMQ:
                 msg = self.socket.recv_string(flags=zmq.NOBLOCK)
             else:
                 msg = self.socket.recv_string()
-        except zmq.Again(e):
+        except zmq.Again, e:
             raise ZMQ_Again(e)
 
         if isinstance(msg, unicode):

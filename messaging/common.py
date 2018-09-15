@@ -6,18 +6,15 @@
 #   Sends "Hello" to server, expects "World" back
 #
 
-from zeromq_exception import ZMQ_Again
 import numpy as np
 import time
 import sys
 from random import randrange
+from ZMQ_Again_Exception import ZMQ_Again
 
 NONBLOCK_DELAY = 0.1
 PRINT_INTERVAL = 10
 
-
-class ZMQ_Again(Exception):
-    pass
 
 
 def client(socket):
@@ -26,7 +23,7 @@ def client(socket):
     for request in range(10):
         print "Sending request {} …".format(request)
         message = {'msg':"Hello", 'count':request, 'number':data}
-        socket.send_pyobj(socket)
+        socket.send_pyobj(message)
 
         #  Get the reply.
         try:
