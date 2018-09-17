@@ -8,8 +8,9 @@
 from wrapLibAudioServer import audio_recorder
 from libUltrasound import combineExtractionResults
 
-import zmq
+from zeromq_compat import ZeroMQ, ZMQ_Again
 from threading import Thread
+import time
 
 from CONFIG import ZMQ_AUDIO_SERVER_ADDRESS_SPEC, ZMQ_AUDIO_PUB_ADDRESS_SPEC
 PREFIX = 'audio_recorder__'
@@ -21,13 +22,9 @@ XMQ_SUB_POLLER_GENERATION = None
 class AudioServer:
 
     def __init__(self, rpc_address_spec, server_pub_address_spec):
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REP)
-        self.socket.bind(rpc_address_spec)
+        self.socket = ZeroMQ(rpc_address_spec, ZeroMQ.REP)
         self.remote_object = None
-
-        self.pub_socket = self.context.socket(zmq.PUB)
-        self.pub_socket.bind(server_pub_address_spec)
+        self.pub_socket = ZeroMQ(server_pub_address_spec, ZeroMQ.PUB)
         self.run = False
         self.t = None
 
@@ -48,7 +45,11 @@ class AudioServer:
     def _server(self):
         global PREFIX, XMQ_SUB_POLLER_GENERATION
         while self.run:
-            fun_name, args, kwargs = self.socket.recv_pyobj()
+            try:
+                fun_name, args, kwargs = self.socket.recv_pyobj(blocking=False)
+            except ZMQ_Again:
+                time.sleep(0.05)
+                continue
             print 'audio_recorder server -- received {}'.format(fun_name)
 
             if fun_name == 'exit':
@@ -104,13 +105,15 @@ class AudioServer:
 
     def stop(self, wait=True):
         print 'stop'
-        if not self.run or  self.t is None:
-            return
+        if self.run and  self.t is not None:
+            self.run = False
+            if wait:
+                self.t.join()
+        if self.socket and not self.socket.closed:
+            self.socket.close()
+        if self.pub_socket and not self.pub_socket.closed:
+            self.pub_socket.close()
 
-        self.run = False
-        if wait:
-            self.t.join()
-        return
 
     def wait(self):
         print 'wait'

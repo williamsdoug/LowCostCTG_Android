@@ -9,8 +9,9 @@ from libDecel import extractAllDecels, summarizeDecels
 from paramsDecel import FEATURE_EXTRACT_PARAMS
 from libUC import findUC
 
-import zmq
+from zeromq_compat import ZeroMQ, ZMQ_Again
 from threading import Thread
+import time
 
 #
 # Server Code
@@ -26,17 +27,19 @@ SERVED_FUNCTIONS = {
 class BatchServer:
 
     def __init__(self, rpc_address_spec):
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REP)
-        self.socket.bind(rpc_address_spec)
+        self.socket = ZeroMQ(rpc_address_spec, ZeroMQ.REP)
         self.run = False
         self.t = None
 
     def _server(self):
         global SERVED_FUNCTIONS
         while self.run:
-            fun_name, args, vargs = self.socket.recv_pyobj()
-            'wrapLibDecel server -- received {}'.format(fun_name)
+            try:
+                fun_name, args, kwargs = self.socket.recv_pyobj(blocking=False)
+            except ZMQ_Again:
+                time.sleep(0.05)
+                continue
+            print 'wrapLibDecel server -- received {}'.format(fun_name)
 
             if fun_name == 'exit':
                 # terminate gracefully
@@ -46,11 +49,11 @@ class BatchServer:
             elif fun_name in SERVED_FUNCTIONS:
                 # special case handling for
                 if fun_name == 'extractAllDecels':
-                    vargs['allExtractorParams'] = FEATURE_EXTRACT_PARAMS
+                    kwargs['allExtractorParams'] = FEATURE_EXTRACT_PARAMS
 
                 # execute function call locally
                 try:
-                    ret = SERVED_FUNCTIONS[fun_name](*args, **vargs)
+                    ret = SERVED_FUNCTIONS[fun_name](*args, **kwargs)
 
                     print 'wrapLibDecel server -- returning response'
                     self.socket.send_pyobj([True, ret])
@@ -78,13 +81,13 @@ class BatchServer:
 
     def stop(self, wait=True):
         print 'stop'
-        if not self.run or  self.t is None:
-            return
+        if self.run and  self.t is not None:
+            self.run = False
+            if wait:
+                self.t.join()
+        if self.socket and not self.socket.closed:
+            self.socket.close()
 
-        self.run = False
-        if wait:
-            self.t.join()
-        return
 
     def wait(self):
         print 'wait'

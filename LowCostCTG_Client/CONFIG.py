@@ -5,30 +5,31 @@
 #  All Rights Reserved
 #
 
+# Address for each RPC server
+def set_address_spec(ip):
+    global ZMQ_CLIENT_ADDRESS_SPEC
+    ZMQ_CLIENT_ADDRESS_SPEC = {
+        'libDecel':             {'addr':"tcp://" + ip + ":5555", 'type':'req'},
+        'libAudio':             {'addr':"tcp://" + ip + ":5556", 'type':'req'},
+        'libAudioCallbacks':    {'addr':"tcp://" + ip + ":5557",'type':'sub'},
+        'libTocopatch':         {'addr':"tcp://" + ip + ":5558", 'type':'req'},
+        'libTocopatchCallbacks':{'addr':"tcp://" + ip + ":5559",'type':'sub'},
+    }
+
+
 #
 # ZMQ Configuration
 #
 USE_LOCALHOST = True
 
-ANDROID_IP = "192.168.86.181"
+ANDROID_IP = "192.168.86.181"     # remote IP Address
 
-# Address for each RPC server
 if USE_LOCALHOST:
-    ZMQ_CLIENT_ADDRESS_SPEC = {
-        'libDecel':{'addr':"tcp://localhost:5555", 'type':'req'},
-        'libAudio':{'addr':"tcp://localhost:5556", 'type':'req'},
-        'libAudioCallbacks':{'addr':"tcp://localhost:5557",'type':'sub'},
-        'libTocopatch':{'addr':"tcp://localhost:5558", 'type':'req'},
-        'libTocopatchCallbacks':{'addr':"tcp://localhost:5559",'type':'sub'},
-    }
-else:
-    ZMQ_CLIENT_ADDRESS_SPEC = {
-        'libDecel':             {'addr':"tcp://" + ANDROID_IP + ":5555", 'type':'req'},
-        'libAudio':             {'addr':"tcp://" + ANDROID_IP + ":5556", 'type':'req'},
-        'libAudioCallbacks':    {'addr':"tcp://" + ANDROID_IP + ":5557",'type':'sub'},
-        'libTocopatch':         {'addr':"tcp://" + ANDROID_IP + ":5558", 'type':'req'},
-        'libTocopatchCallbacks':{'addr':"tcp://" + ANDROID_IP + ":5559",'type':'sub'},
-    }
+    ANDROID_IP = "localhost"
+
+
+set_address_spec(ANDROID_IP)    # Define default address for each RPC server
+                                # can override  by subsequent calls to set_address_spec
 
 # Below parameters relate to use JeroMQ native java library
 
