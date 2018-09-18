@@ -12,6 +12,7 @@ class ZeroMQ:
     def __init__(self, address, mode):
         self.context = zmq.Context()
         self.socket = self.context.socket(mode)
+        self.closed = False
 
         if mode == self.REQ:
             self.socket.connect(address)
@@ -25,8 +26,10 @@ class ZeroMQ:
 
 
     def close(self):
-        self.socket.close()
-        self.context.term()
+        if not self.closed:
+            self.closed = True
+            self.socket.close()
+            self.context.term()
 
 
     def recv_pyobj(self, blocking=True):

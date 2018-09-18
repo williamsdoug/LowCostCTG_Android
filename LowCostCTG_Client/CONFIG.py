@@ -20,9 +20,9 @@ def set_address_spec(ip):
 #
 # ZMQ Configuration
 #
-USE_LOCALHOST = True
+USE_LOCALHOST = False
 
-ANDROID_IP = "192.168.86.181"     # remote IP Address
+ANDROID_IP = "192.168.86.183"     # remote IP Address
 
 if USE_LOCALHOST:
     ANDROID_IP = "localhost"
